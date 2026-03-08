@@ -1,0 +1,46 @@
+.welcome-container {
+  display: flex;
+  justify-content: top;
+  align-items: center;
+  background-color: #4CAF50;
+  padding: 1rem;
+}
+
+.welcome-card {
+  background-color: #101585;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 420px;
+  color: white;
+  text-align: center;
+}
+
+.welcome-card h1 {
+  font-size: 2.5rem;
+  margin: 0 0 0.75rem 0;
+  color: #FFDD44;
+}
+
+.link-button {
+  font-family: Playfair, Georgia, 'Times New Roman', Times, serif;
+  width: 100%;
+  background-color: #FFDD44;
+  color: #101585;
+  border: none;
+  border-radius: 10px;
+  padding: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.link-button:hover:not(:disabled) {
+  background-color: #ffeb3b;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}

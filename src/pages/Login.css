@@ -1,0 +1,137 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #4CAF50;
+  padding: 1rem;
+}
+
+.login-card {
+  background-color: #101585;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 420px;
+  color: white;
+  text-align: center;
+}
+
+.login-card h1 {
+  font-size: 2.5rem;
+  margin: 0 0 0.75rem 0;
+  color: #FFDD44;
+}
+
+.login-subtitle {
+  font-size: 1.1rem;
+  color: #e0e0ff;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #e0e0ff;
+}
+
+input {
+  width: 90%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #444;
+  border-radius: 6px;
+  background-color: #1e1e4d;
+  color: white;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+  font-family: Playfair, Georgia, 'Times New Roman', Times, serif;
+}
+
+input:focus {
+  outline: none;
+  border-color: #FFDD44;
+  box-shadow: 0 0 0 3px rgba(255, 221, 68, 0.25);
+}
+
+.login-button {
+  width: 100%;
+  background-color: #FFDD44;
+  color: #101585;
+  border: none;
+  border-radius: 8px;
+  padding: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.login-button:hover:not(:disabled) {
+  background-color: #ffeb3b;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.login-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.register-prompt {
+  margin-top: 2rem;
+  font-size: 1rem;
+  color: #e0e0ff;
+}
+
+.register-prompt p {
+  margin-bottom: 0.75rem;
+}
+
+.register-link-button {
+  background-color: whitesmoke;
+  border: 1px solid #FFDD44;
+  color: #101585;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.register-link-button:hover {
+  background-color: #FFDD44;
+  transform: translateY(-1px);
+}
+
+.error {
+  color: #ff6b6b;
+  font-size: 0.9rem;
+  margin-top: 0.4rem;
+  display: block;
+}
+
+.success,
+.server-error {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.success {
+  background-color: rgba(68, 255, 136, 0.2);
+  color: #44ff88;
+}
+
+.server-error {
+  background-color: rgba(255, 107, 107, 0.2);
+  color: #ff6b6b;
+}

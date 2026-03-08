@@ -1,0 +1,136 @@
+.nav-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #101585;
+  padding: 1rem 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  box-sizing: border-box;
+
+  /* Force font on entire navbar */
+  font-family: Playfair, Georgia, 'Times New Roman', Times, serif;
+}
+
+.nav-bar * {
+  font-family: Playfair, Georgia, 'Times New Roman', Times, serif;
+}
+
+.nav-logo a {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #FFDD44;
+  text-decoration: none;
+}
+
+.nav-logo a:hover {
+  color: #ffeb3b;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 1.8rem;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+}
+
+.nav-links a,
+.nav-links button {
+  color: white;
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: 500;
+  background: none;
+  border: none;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.2s ease;
+  line-height: 1.4;
+}
+
+.nav-links a:hover,
+.nav-links button:hover {
+  color: #FFDD44;
+  transform: translateY(-1px);
+}
+
+.nav-links a.active {
+  color: #FFDD44;
+  border-bottom: 2px solid #FFDD44;
+}
+
+.logout-btn {
+  opacity: 0.5;
+  font-weight: 500;
+}
+
+.logout-btn:hover {
+  opacity: 1;
+  color: #FFDD44;
+}
+
+/* Hamburger toggle – hidden by default */
+.menu-toggle {
+  display: none;  /* shown only on mobile */
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.8rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.menu-toggle:hover {
+  color: #FFDD44;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .nav-bar {
+    padding: 0.8rem 1.2rem;
+  }
+
+  .menu-toggle {
+    display: block;  /* show on mobile */
+  }
+
+  .nav-links {
+    display: none;  /* hide by default */
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: #101585;
+    width: 100%;
+    padding: 1rem 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    gap: 0.5rem;  /* tighter spacing on mobile */
+  }
+
+  .nav-links.active {
+    display: flex;  /* show when toggled */
+  }
+
+  .nav-item {
+    margin: 0.75rem 0;
+    text-align: center;
+  }
+
+  .nav-links a,
+  .nav-links button {
+    width: 100%;
+    padding: 1rem;
+  }
+}
