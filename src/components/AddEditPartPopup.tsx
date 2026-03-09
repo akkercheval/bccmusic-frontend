@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Popup from "reactjs-popup";
-import "./AddEditPartPopup.css"; // Create similar to AddNewComposerPopup.css
+import "./AddEditPartPopup.css";
 
 interface AddEditPartPopupProps {
   open: boolean;

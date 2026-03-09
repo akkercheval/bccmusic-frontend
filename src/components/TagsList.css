@@ -1,0 +1,57 @@
+.tags-section {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.section-label {
+  font-size: 1.1rem;  
+  font-weight: 500;
+  color: #e0e0ff;
+  display: block;
+  margin-bottom: 0.75rem;
+  text-align: left;
+}
+
+.tags-list {
+  margin-bottom: 1rem;
+}
+
+.tag-entry {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.add-btn {
+  background: #FFDD44;
+  color: #101585;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.add-btn:hover {
+  background: #ffeb3b;
+}
+
+.remove-btn {
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+  align-self: center;
+}
+
+.remove-btn:hover {
+  background: #ff5252;
+}

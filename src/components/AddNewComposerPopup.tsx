@@ -58,8 +58,8 @@ export default function AddNewComposerPopup({
 
   return (
     <Popup open={open} onClose={onClose} modal nested>
-      <div className="modal">
-        <div className="modal-content">
+      <div className="popup">
+        <div className="popup-content">
           <h2>Add New Composer</h2>
           {error && <div className="error">{error}</div>}
           <form onSubmit={handleSubmit}>

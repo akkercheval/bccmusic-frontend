@@ -7,6 +7,7 @@ import PartList from "../components/PartList";
 import type { Part } from "../components/PartList";
 import type { ComposerEntry } from "../components/ComposerList";
 import "./AddNewScore.css";
+import TagsList from "../components/TagsList";
 
 interface CollaborationAccount {
   ownerAccountId: number;
@@ -36,6 +37,9 @@ export default function AddNewScore() {
   });
 
   const [parts, setParts] = useState<Part[]>([]);
+  const [tags, setTags] = useState<
+    { scoreTagId?: number; scoreId?: number; tag: string }[]
+  >([]);
   const [allowedOwners, setAllowedOwners] = useState<CollaborationAccount[]>(
     [],
   );
@@ -171,10 +175,7 @@ export default function AddNewScore() {
           })
           .filter(Boolean),
         parts: parts,
-        tags: formData.tags
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean),
+        tags: tags,
         medleyPieces: formData.medleyPieces
           .split(",")
           .map((s) => s.trim())
@@ -331,17 +332,12 @@ export default function AddNewScore() {
 
         <PartList parts={parts} setParts={setParts} />
 
-        <div className="form-group">
-          <label htmlFor="tags">Tags (comma-separated)</label>
-          <input
-            type="text"
-            id="tags"
-            name="tags"
-            value={formData.tags}
-            onChange={handleChange}
-            onBlur={handleBlur}
-          />
-        </div>
+        <TagsList
+          tags={tags}
+          setTags={setTags}
+          existingTags={tags}
+          setExistingTags={setTags}
+        />
 
         <div className="form-group">
           <label htmlFor="medleyPieces">Medley Pieces (comma-separated)</label>
