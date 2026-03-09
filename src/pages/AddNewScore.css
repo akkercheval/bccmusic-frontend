@@ -107,25 +107,6 @@ select:focus {
 .secondary-button:hover {
   background-color: #ffeb3b;
 }
-/* Parts List */
-.parts-list {
-  margin-top: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-.part-item {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  background-color: #1e1e4d;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-}
-.part-item span {
-  flex: 1;
-  color: white;
-}
 
 @media (max-width: 600px) {
   .form-group {

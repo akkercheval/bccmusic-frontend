@@ -3,7 +3,8 @@ import { useAuth } from "../context/AuthContext";
 import React, { useState, useEffect } from "react";
 import api from "../services/api";
 import ComposerList from "../components/ComposerList";
-import AddEditPartPopup from "../components/AddEditPartPopup";
+import PartList from "../components/PartList";
+import type { Part } from "../components/PartList";
 import type { ComposerEntry } from "../components/ComposerList";
 import "./AddNewScore.css";
 
@@ -13,15 +14,6 @@ interface CollaborationAccount {
   collaboratorAccountId: number;
   collaboratorAccountName: string;
   permissionLevel: string;
-}
-
-interface Part {
-  instrument: string;
-  hasSolo: boolean;
-  regularPartCount: number;
-  flexMinPart?: number;
-  flexPartCount?: number;
-  partComments?: string;
 }
 
 export default function AddNewScore() {
@@ -44,9 +36,6 @@ export default function AddNewScore() {
   });
 
   const [parts, setParts] = useState<Part[]>([]);
-  const [showPartPopup, setShowPartPopup] = useState(false);
-  const [editingPartIndex, setEditingPartIndex] = useState<number | null>(null);
-
   const [allowedOwners, setAllowedOwners] = useState<CollaborationAccount[]>(
     [],
   );
@@ -141,45 +130,6 @@ export default function AddNewScore() {
     setTouched((prev) => ({ ...prev, [name]: true }));
     const error = validateField(name, value);
     setErrors((prev) => ({ ...prev, [name]: error }));
-  };
-
-  const handleSavePart = (savedPart: Part) => {
-    const cleanedData: Part = {
-      ...savedPart,
-      flexMinPart:
-        savedPart.flexMinPart !== undefined && savedPart.flexMinPart > 0
-          ? savedPart.flexMinPart
-          : undefined,
-      flexPartCount:
-        savedPart.flexPartCount !== undefined && savedPart.flexPartCount > 0
-          ? savedPart.flexPartCount
-          : undefined,
-      partComments: savedPart.partComments?.trim() || undefined,
-    };
-
-    if (editingPartIndex !== null) {
-      setParts((prev) =>
-        prev.map((p, i) => (i === editingPartIndex ? cleanedData : p)),
-      );
-    } else {
-      setParts((prev) => [...prev, cleanedData]);
-    }
-    setShowPartPopup(false);
-    setEditingPartIndex(null);
-  };
-
-  const handleCancelPart = () => {
-    setShowPartPopup(false);
-    setEditingPartIndex(null);
-  };
-
-  const editPart = (index: number) => {
-    setEditingPartIndex(index);
-    setShowPartPopup(true);
-  };
-
-  const removePart = (index: number) => {
-    setParts((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.SubmitEvent) => {
@@ -379,39 +329,7 @@ export default function AddNewScore() {
           setExistingComposers={setExistingComposers}
         />
 
-        <div className="form-group">
-          <label>Parts</label>
-          <button
-            type="button"
-            onClick={() => {
-              setShowPartPopup(true);
-              setEditingPartIndex(null);
-            }}
-          >
-            Add New Instrument's Parts
-          </button>
-          <div className="parts-list">
-            {parts.map((part, index) => (
-              <div key={index} className="part-item">
-                <span>
-                  {part.instrument} - Regular Count: {part.regularPartCount},
-                  Solo: {part.hasSolo ? "Yes" : "No"}
-                  {part.flexMinPart ? `, Flex Min: ${part.flexMinPart}` : ""}
-                  {part.flexPartCount
-                    ? `, Flex Count: ${part.flexPartCount}`
-                    : ""}
-                  {part.partComments ? ` - Comments: ${part.partComments}` : ""}
-                </span>
-                <button type="button" onClick={() => editPart(index)}>
-                  Edit
-                </button>
-                <button type="button" onClick={() => removePart(index)}>
-                  Remove
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
+        <PartList parts={parts} setParts={setParts} />
 
         <div className="form-group">
           <label htmlFor="tags">Tags (comma-separated)</label>
