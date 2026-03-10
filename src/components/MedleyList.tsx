@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./MedleyList.css";
-import AddNewComposerPopup from "./AddNewComposerPopup";
+import AddNewComposerPopup from "./AddEditComposerPopup";
 
 export interface MedleyEntry {
   medleyId?: number;

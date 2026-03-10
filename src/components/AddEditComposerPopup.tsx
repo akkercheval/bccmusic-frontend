@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import Popup from "reactjs-popup";
 import api from "../services/api";
-import "./AddNewComposerPopup.css";
+import "./AddEditComposerPopup.css";
 
-interface AddNewComposerPopupProps {
+interface AddEditComposerPopupProps {
   open: boolean;
   onClose: () => void;
   onSuccess: (newComposer: {
@@ -14,11 +14,11 @@ interface AddNewComposerPopupProps {
   }) => void;
 }
 
-export default function AddNewComposerPopup({
+export default function AddEditComposerPopup({
   open,
   onClose,
   onSuccess,
-}: AddNewComposerPopupProps) {
+}: AddEditComposerPopupProps) {
   const [firstName, setFirstName] = useState("");
   const [middleName, setMiddleName] = useState("");
   const [lastName, setLastName] = useState("");

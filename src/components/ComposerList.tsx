@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./ComposerList.css";
-import AddNewComposerPopup from "./AddNewComposerPopup";
+import AddNewComposerPopup from "./AddEditComposerPopup";
 
 export interface ComposerEntry {
   composerId?: number;

@@ -9,11 +9,8 @@ import type { ComposerEntry } from "../components/ComposerList";
 import "./AddNewScore.css";
 import TagsList from "../components/TagsList";
 import MedleyList from "../components/MedleyList";
-
-export interface Account {
-  accountId: number;
-  accountName: string;
-}
+import type { Account } from "../types/Account";
+import AddEditVendorPopup from "../components/AddEditVendorPopup";
 
 interface CollaborationAccount {
   ownerAccountId: number;
@@ -21,6 +18,11 @@ interface CollaborationAccount {
   collaboratorAccountId: number;
   collaboratorAccountName: string;
   permissionLevel: string;
+}
+
+interface Vendor {
+  vendorId: number;
+  vendorName: string;
 }
 
 export default function AddNewScore() {
@@ -69,6 +71,8 @@ export default function AddNewScore() {
   const [scoreComposers, setScoreComposers] = useState<ComposerEntry[]>([
     { contributionType: "" },
   ]);
+  const [existingVendors, setExistingVendors] = useState<Vendor[]>([]);
+  const [showVendorPopup, setShowVendorPopup] = useState(false);
 
   useEffect(() => {
     if (loading || !user) return;
@@ -108,6 +112,10 @@ export default function AddNewScore() {
     api.get("/arrangement-types").then((res) => {
       setArrangementTypes(res.data);
     });
+    api
+      .get("/vendors")
+      .then((res) => setExistingVendors(res.data))
+      .catch((err) => console.error("Failed to fetch vendors", err));
   }, [loading, user]);
 
   if (loading) return <div>Loading...</div>;
@@ -184,9 +192,9 @@ export default function AddNewScore() {
       scoreTitle: formData.scoreTitle.trim(),
       scoreSubtitle: formData.scoreSubtitle?.trim() || null,
       owner: { accountId: parseInt(formData.owner) },
-      purchasedFrom: formData.purchasedFrom?.trim()
-        ? { vendorName: formData.purchasedFrom.trim() }
-        : null, // Assume object; adjust if ID
+      purchasedFrom: formData.purchasedFrom
+        ? { vendorId: parseInt(formData.purchasedFrom) } // ← now sends ID (matches backend)
+        : null,
       purchasedDate: formData.purchasedDate || null,
       purchasedCost: formData.purchasedCost
         ? parseFloat(formData.purchasedCost)
@@ -228,6 +236,15 @@ export default function AddNewScore() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleNewVendorSuccess = (newVendor: Vendor) => {
+    setExistingVendors((prev) => [...prev, newVendor]);
+    setFormData((prev) => ({
+      ...prev,
+      purchasedFrom: newVendor.vendorId.toString(),
+    }));
+    setShowVendorPopup(false);
   };
 
   return (
@@ -290,14 +307,29 @@ export default function AddNewScore() {
 
         <div className="form-group">
           <label htmlFor="purchasedFrom">Purchased From</label>
-          <input
-            type="text"
+          <select
             id="purchasedFrom"
             name="purchasedFrom"
             value={formData.purchasedFrom}
-            onChange={handleChange}
-            onBlur={handleBlur}
-          />
+            onChange={(e) => {
+              if (e.target.value === "new") {
+                setShowVendorPopup(true);
+              } else {
+                setFormData((prev) => ({
+                  ...prev,
+                  purchasedFrom: e.target.value,
+                }));
+              }
+            }}
+          >
+            <option value="">— Select or create vendor —</option>
+            {existingVendors.map((v) => (
+              <option key={v.vendorId} value={v.vendorId}>
+                {v.vendorName}
+              </option>
+            ))}
+            <option value="new">+ Create new vendor</option>
+          </select>
         </div>
 
         <div className="form-group">
@@ -385,6 +417,11 @@ export default function AddNewScore() {
           {isLoading ? "Adding Score..." : "Add Score"}
         </button>
       </form>
+      <AddEditVendorPopup
+        open={showVendorPopup}
+        onClose={() => setShowVendorPopup(false)}
+        onSuccess={handleNewVendorSuccess}
+      />
     </div>
   );
 }
