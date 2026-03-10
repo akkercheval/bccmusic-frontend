@@ -97,8 +97,6 @@ export default function ComposerList({
       return; // or keep previous value
     }
 
-    console.log(`[SELECT] Parsed ID: ${parsedId} (success)`);
-
     updateComposer(index, "composerId", parsedId);
   };
 

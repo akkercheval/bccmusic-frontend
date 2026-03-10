@@ -8,6 +8,12 @@ import type { Part } from "../components/PartList";
 import type { ComposerEntry } from "../components/ComposerList";
 import "./AddNewScore.css";
 import TagsList from "../components/TagsList";
+import MedleyList from "../components/MedleyList";
+
+export interface Account {
+  accountId: number;
+  accountName: string;
+}
 
 interface CollaborationAccount {
   ownerAccountId: number;
@@ -24,37 +30,43 @@ export default function AddNewScore() {
   const [formData, setFormData] = useState({
     scoreTitle: "",
     scoreSubtitle: "",
-    selectedOwnerId: "",
-    purchasedName: "",
+    owner: "",
+    purchasedFrom: "",
     purchasedDate: null,
     purchasedCost: null,
     grade: null,
-    arrangementTypeCode: "",
-    composers: "",
+    arrangementType: "",
+    scoreComposers: "",
     parts: "",
-    tags: "",
-    medleyPieces: "",
+    scoreTags: "",
+    medleys: "",
   });
 
   const [parts, setParts] = useState<Part[]>([]);
-  const [tags, setTags] = useState<
+  const [scoreTags, setScoreTags] = useState<
     { scoreTagId?: number; scoreId?: number; tag: string }[]
   >([]);
-  const [allowedOwners, setAllowedOwners] = useState<CollaborationAccount[]>(
-    [],
-  );
+  const [allowedOwners, setAllowedOwners] = useState<Account[]>([]);
   const [arrangementTypes, setArrangementTypes] = useState<
     { code: string; name: string }[]
   >([]);
   const [existingComposers, setExistingComposers] = useState<
     { id: number; firstName?: string; middleName?: string; lastName: string }[]
   >([]);
+  const [medleys, setMedleys] = useState<
+    {
+      medleyId?: number;
+      scoreId?: number;
+      pieceTitle: string;
+      composerId?: number;
+    }[]
+  >([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [composerRows, setComposerRows] = useState<ComposerEntry[]>([
+  const [scoreComposers, setScoreComposers] = useState<ComposerEntry[]>([
     { contributionType: "" },
   ]);
 
@@ -64,13 +76,22 @@ export default function AddNewScore() {
     api
       .get("/collaborators/my-collaborations")
       .then((res) => {
-        const owners = res.data;
-        setAllowedOwners(owners);
+        const collaborations: CollaborationAccount[] = res.data;
+        const validCollaborations = collaborations.filter(
+          (collab) =>
+            collab.ownerAccountId === user.accountId ||
+            collab.collaboratorAccountId === user.accountId,
+        );
+        const ownerAccounts = validCollaborations.map((collab) => ({
+          accountId: collab.ownerAccountId,
+          accountName: collab.ownerAccountName,
+        }));
+        setAllowedOwners(ownerAccounts);
 
-        if (owners.length > 0) {
+        if (ownerAccounts.length > 0) {
           setFormData((prev) => ({
             ...prev,
-            selectedOwnerId: owners[0].ownerAccountId.toString(),
+            owner: ownerAccounts[0].accountId.toString(),
           }));
         }
       })
@@ -102,10 +123,10 @@ export default function AddNewScore() {
       case "scoreTitle":
         if (!value.trim()) error = "Score title is required";
         break;
-      case "arrangementTypeCode":
+      case "arrangementType":
         if (!value.trim()) error = "Arrangement type is required";
         break;
-      case "selectedOwnerId":
+      case "owner":
         if (!value) error = "Please select an owner";
         break;
       default:
@@ -138,55 +159,69 @@ export default function AddNewScore() {
 
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
+    setErrors({});
     setServerError(null);
     setSuccessMessage(null);
-
-    // Validate all fields
-    const newErrors: Record<string, string> = {};
-    Object.entries(formData).forEach(([name, value]) => {
-      const error = validateField(name, value as string);
-      if (error) newErrors[name] = error;
-    });
-
-    setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) return;
-
     setIsLoading(true);
 
+    // Validate required fields
+    const newErrors: Record<string, string> = {};
+    if (!formData.scoreTitle.trim())
+      newErrors.scoreTitle = "Score title is required";
+    if (!formData.arrangementType)
+      newErrors.arrangementTypeCode = "Arrangement type is required";
+    if (!formData.owner) newErrors.owner = "Please select an owner";
+
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      console.log("Validation errors:", newErrors); // Debug
+      setServerError("Please fix the errors above.");
+      setIsLoading(false);
+      return;
+    }
+
+    const payload = {
+      scoreTitle: formData.scoreTitle.trim(),
+      scoreSubtitle: formData.scoreSubtitle?.trim() || null,
+      owner: { accountId: parseInt(formData.owner) },
+      purchasedFrom: formData.purchasedFrom?.trim()
+        ? { vendorName: formData.purchasedFrom.trim() }
+        : null, // Assume object; adjust if ID
+      purchasedDate: formData.purchasedDate || null,
+      purchasedCost: formData.purchasedCost
+        ? parseFloat(formData.purchasedCost)
+        : null,
+      grade: formData.grade ? parseFloat(formData.grade) : null,
+      arrangementType: { code: formData.arrangementType }, // Key change: send object
+      scoreComposers: scoreComposers.map((c) => ({
+        composer: { composerId: c.composerId },
+        contributionType: c.contributionType.trim(),
+      })),
+      parts: parts.map((p) => ({
+        instrument: p.instrument,
+        hasSolo: p.hasSolo,
+        regularPartCount: p.regularPartCount,
+        flexMinPart: p.flexMinPart ?? null,
+        flexPartCount: p.flexPartCount ?? null,
+        partComments: p.partComments?.trim() || null,
+      })),
+      scoreTags: scoreTags.map((t) => ({ tag: t.tag.trim() })),
+      medleys: medleys.map((m) => ({
+        pieceTitle: m.pieceTitle.trim(),
+        composer: m.composerId ? { composerId: m.composerId } : null,
+      })),
+    };
+
+    console.log("Submitting payload:", payload); // Debug to verify structure
+
     try {
-      const payload = {
-        scoreTitle: formData.scoreTitle,
-        scoreSubtitle: formData.scoreSubtitle,
-        ownerAccountId: Number(formData.selectedOwnerId),
-        purchasedName: formData.purchasedName,
-        purchasedDate: formData.purchasedDate,
-        purchasedCost: formData.purchasedCost,
-        grade: formData.grade,
-        arrangementTypeCode: formData.arrangementTypeCode,
-        composers: composerRows
-          .map((row) => {
-            if (row.composerId) {
-              return {
-                composerId: row.composerId,
-                contributionType: row.contributionType,
-              };
-            }
-            return null;
-          })
-          .filter(Boolean),
-        parts: parts,
-        tags: tags,
-        medleyPieces: formData.medleyPieces
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean),
-      };
-
-      await api.post("/scores", payload);
-
-      setSuccessMessage("Score added successfully! Redirecting...");
-      setTimeout(() => navigate("/my-scores"), 2000);
+      const response = await api.post("/scores", payload);
+      setSuccessMessage("Score added successfully!");
+      // Optional: Reset form or navigate
+      // setFormData({ ...initialFormData });
+      // navigate("/scores");
     } catch (err: any) {
+      console.error("Submit error:", err);
       setServerError(
         err.response?.data?.message || "Failed to add score. Please try again.",
       );
@@ -235,31 +270,31 @@ export default function AddNewScore() {
           <label htmlFor="owner">Score Owner*</label>
           <select
             id="owner"
-            name="selectedOwnerId"
-            value={formData.selectedOwnerId}
+            name="owner"
+            value={formData.owner}
             onChange={handleChange}
             onBlur={handleBlur}
             required
           >
             <option value="">Select owner...</option>
             {allowedOwners.map((o) => (
-              <option key={o.ownerAccountId} value={o.ownerAccountId}>
-                {o.ownerAccountName} ({o.permissionLevel})
+              <option key={o.accountId} value={o.accountId}>
+                {o.accountName}
               </option>
             ))}
           </select>
-          {touched.selectedOwnerId && errors.selectedOwnerId && (
-            <span className="error">{errors.selectedOwnerId}</span>
+          {touched.owner && errors.owner && (
+            <span className="error">{errors.owner}</span>
           )}
         </div>
 
         <div className="form-group">
-          <label htmlFor="purchasedName">Purchased From</label>
+          <label htmlFor="purchasedFrom">Purchased From</label>
           <input
             type="text"
-            id="purchasedName"
-            name="purchasedName"
-            value={formData.purchasedName}
+            id="purchasedFrom"
+            name="purchasedFrom"
+            value={formData.purchasedFrom}
             onChange={handleChange}
             onBlur={handleBlur}
           />
@@ -306,11 +341,11 @@ export default function AddNewScore() {
         </div>
 
         <div className="form-group">
-          <label htmlFor="arrangementTypeCode">Arrangement Type*</label>
+          <label htmlFor="arrangementType">Arrangement Type*</label>
           <select
-            id="arrangementTypeCode"
-            name="arrangementTypeCode"
-            value={formData.arrangementTypeCode}
+            id="arrangementType"
+            name="arrangementType"
+            value={formData.arrangementType}
             onChange={handleChange}
             required
           >
@@ -324,8 +359,8 @@ export default function AddNewScore() {
         </div>
 
         <ComposerList
-          composers={composerRows}
-          setComposers={setComposerRows}
+          composers={scoreComposers}
+          setComposers={setScoreComposers}
           existingComposers={existingComposers}
           setExistingComposers={setExistingComposers}
         />
@@ -333,23 +368,18 @@ export default function AddNewScore() {
         <PartList parts={parts} setParts={setParts} />
 
         <TagsList
-          tags={tags}
-          setTags={setTags}
-          existingTags={tags}
-          setExistingTags={setTags}
+          tags={scoreTags}
+          setTags={setScoreTags}
+          existingTags={scoreTags}
+          setExistingTags={setScoreTags}
         />
 
-        <div className="form-group">
-          <label htmlFor="medleyPieces">Medley Pieces (comma-separated)</label>
-          <input
-            type="text"
-            id="medleyPieces"
-            name="medleyPieces"
-            value={formData.medleyPieces}
-            onChange={handleChange}
-            onBlur={handleBlur}
-          />
-        </div>
+        <MedleyList
+          medleys={medleys}
+          setMedleys={setMedleys}
+          existingComposers={existingComposers}
+          setExistingComposers={setExistingComposers}
+        />
 
         <button type="submit" disabled={isLoading}>
           {isLoading ? "Adding Score..." : "Add Score"}

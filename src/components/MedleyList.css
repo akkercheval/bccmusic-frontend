@@ -1,0 +1,73 @@
+.medley-section {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.section-label {
+  font-size: 1.1rem;  
+  font-weight: 500;
+  color: #e0e0ff;
+  display: block;
+  margin-bottom: 0.75rem;
+  text-align: left;
+}
+
+.medley-row {
+  display: grid;
+  grid-template-columns: 3fr 3fr 0.2fr;
+  gap: 2.0rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  align-items: center;
+}
+
+.medley-row .form-group {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0; /* Remove extra margins */
+}
+
+.medley-row .form-group label {
+  text-align: right;
+  padding-right: 0.5rem;
+}
+
+.medley-row .form-group input,
+.medley-row .form-group select {
+  width: 100%;
+}
+
+.add-btn {
+  background: #FFDD44;
+  color: #101585;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.add-btn:hover {
+  background: #ffeb3b;
+}
+
+.remove-btn {
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+  align-self: center;
+  justify-self: center;
+}
+
+.remove-btn:hover {
+  background: #ff5252;
+}
