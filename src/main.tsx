@@ -9,6 +9,7 @@ import { AuthProvider } from "./context/AuthContext.tsx";
 import MyScores from "./pages/MyScores.tsx";
 import AddNewScore from "./pages/AddNewScore.tsx";
 import PrivateLayout from "./components/PrivateLayout.tsx";
+import "./styles/shared.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

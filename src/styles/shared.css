@@ -1,0 +1,271 @@
+:root {
+  --primary-yellow: #FFDD44;
+  --hover-yellow: #ffeb3b;
+  --primary-blue: #101585;
+  --accent-red: #ff6b6b;
+  --hover-red: #ff5252;
+  --text-light: #e0e0ff;
+  --input-bg: #1e1e4d;
+  --border: #444;
+  --primary-green: #4CAF50;
+}
+
+body {
+  display: flex;
+  font-family: Playfair, Georgia, 'Times New Roman', Times, serif;
+  margin: .5em;
+  padding: 0;
+  background-color: var(--primary-green);
+  color: var(--primary-blue);
+  min-height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  place-items: center;
+  min-width: 320px;
+}
+
+h1 {
+  font-size: 2.5rem;
+  margin: 0 0 0.75rem 0; 
+  text-align: center;
+  color: var(--primary-yellow);
+}
+
+h2 {
+  font-size: 1.8rem;
+  margin: 1.5rem;
+  color: var(--primary-yellow);
+}
+
+p {
+  font-size: 1.2rem;
+  margin: 25px;
+  color: var(--text-light);
+}
+
+a {
+  font-family: Playfair, Georgia, 'Times New Roman', Times, serif;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+button[type="submit"] {
+  font-family: Playfair, Georgia, 'Times New Roman', Times, serif;
+  background-color: var(--primary-yellow);
+  color: var(--primary-blue);
+  border: none;
+  border-radius: 8px;
+  padding: 0.9rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 1rem;
+  transition: all 0.2s ease;
+}
+
+button[type="submit"]:hover {
+  background-color: var(--hover-yellow);
+}
+
+label {
+  font-weight: 500;
+  color: var(--text-light);
+  text-align: right;
+  padding-right: .5rem;
+  font-size: 1.2rem;
+}
+
+input,
+select {
+  width: 90%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background-color: var(--input-bg);
+  color: var(--text-light);
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: Playfair, Georgia, 'Times New Roman', Times, serif;
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: var(--primary-yellow);
+  box-shadow: 0 0 0 3px rgba(255, 221, 68, 0.25);
+}
+
+input:invalid:focus,
+select:invalid:focus {
+  border-color: var(--accent-red);
+  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.25);
+}
+
+.page-container {
+  display: flex;
+  justify-content: top;
+  align-items: center;
+  padding: .5rem;
+}
+
+.page-card {
+  background-color: var(--primary-blue);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  padding: 2rem 2rem;
+  width: 100%;
+  max-width: 475px;
+  color: white;
+  text-align: center;
+}
+
+.form-group {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1rem;
+  align-items: center;
+  margin: 1rem;
+}
+
+.form-group.full-width {
+  grid-template-columns: 1fr;       
+}
+
+/* Buttons used everywhere */
+.add-btn,
+.primary-button {
+  font-family: inherit;
+  padding: 0.9rem 2rem;
+  font-size: 1.1rem;
+  margin-top: 1.5rem;
+  background: var(--primary-yellow);
+  color: var(--primary-blue);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.primary-button:active {
+  transform: translateY(0);
+}
+
+.add-btn:hover,
+.primary-button:hover {
+  background: var(--hover-yellow);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Secondary Buttons (for edit) */
+.secondary-button {
+  background-color: #FFDD44;
+  color: #101585;
+  border: none;
+  border-radius: 4px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.secondary-button:hover {
+  background-color: #ffeb3b;
+}
+
+.remove-btn {
+  background: var(--accent-red);
+  color: var(--text-light);
+  border: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.remove-btn:hover {
+  background: var(--hover-red);
+}
+
+/* Section labels (PartList, MedleyList, ComposerList) */
+.section-label {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text-light);
+  display: block;
+  margin-bottom: 0.75rem;
+  text-align: left;
+}
+
+/* Popup / Modal styles (Popup.css + AddNewComposerPopup + AddEditPartPopup + AddEditVendorPopup) */
+.popup {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.popup-content {
+  background-color: var(--primary-blue);
+  padding: 2rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  color: white;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.error {
+  color: var(--accent-red);
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+  margin-left: 10px;
+  display: block;
+  grid-column: 2 / 3;
+}
+
+.success {
+  color: var(--primary-green);
+  background-color: rgba(68, 255, 136, 0.15);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.server-error {
+  color: var(--accent-red);
+  background-color: rgba(255, 107, 107, 0.15);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.hint {
+  color: var(--primary-yellow);
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+  display: block;
+  grid-column: 2 / 3;
+}
+
+@media (max-width: 600px) {
+  .form-group {
+    grid-template-columns: 1fr;
+    text-align: left;
+  }
+  label {
+    text-align: left;
+    padding-right: 0;
+  }
+}

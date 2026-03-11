@@ -1,10 +1,17 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "./Dashboard.css";
+import { useEffect } from "react";
 
 export default function Dashboard() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate("/login");
+    }
+  }, [user, loading, navigate]);
 
   if (loading) return <div>Loading...</div>;
   if (!user) {
@@ -17,9 +24,12 @@ export default function Dashboard() {
   const isAdmin = user.accountType === "ADMINISTRATOR";
 
   return (
-    <div className="welcome-container">
-      <div className="welcome-card">
-        <h1>Welcome back, {user.accountName}!</h1>
+    <div className="page-container">
+      <div className="page-card">
+        <h1>
+          Welcome back, <br />
+          {user.accountName}!
+        </h1>
         <p>
           Account Type: <strong>{user.accountType}</strong>
         </p>
