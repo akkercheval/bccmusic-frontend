@@ -1,10 +1,13 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import api from "../services/api";
 import "./Login.css";
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const justLoggedOut =
+    new URLSearchParams(location.search).get("logout") === "success";
 
   const [formData, setFormData] = useState({
     username: "",
@@ -82,6 +85,9 @@ export default function Login() {
   return (
     <div className="page-container">
       <div className="page-card">
+        {justLoggedOut && (
+          <div className="success">You have been logged out successfully.</div>
+        )}
         <h1>Login to BCC Music</h1>
         <p className="login-subtitle">
           Access your music collection and explore shared scores.

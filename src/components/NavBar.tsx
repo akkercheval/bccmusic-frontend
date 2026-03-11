@@ -24,7 +24,7 @@ const NavBar = () => {
     try {
       await api.post("/logout");
       refreshUser(); // Clears user from context
-      navigate("/login");
+      navigate("/login?logout=success");
     } catch (err) {
       console.error("Logout failed", err);
       navigate("/login");
