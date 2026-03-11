@@ -1,16 +1,20 @@
 import React, { useEffect, useState } from "react";
-import DataTable from "react-data-table-component"; // ← must import this
+import DataTable from "react-data-table-component";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
-import "./MyScores.css"; // optional styling
 import { useNavigate } from "react-router-dom";
+import "./MyScores.css";
 
-// Define your data shape (adjust based on your actual MusicScore type)
 interface MusicScore {
   scoreId: number;
   scoreTitle: string;
   grade: number;
-  arrangementType: string;
+  arrangementType: {
+    code: string;
+    name?: string;
+    description?: string;
+    sortOrder?: number;
+  };
   tags: string[];
 }
 
@@ -19,6 +23,7 @@ const columns = [
     name: "ID",
     selector: (row: MusicScore) => row.scoreId,
     sortable: true,
+    width: "80px",
   },
   {
     name: "Title",
@@ -26,23 +31,26 @@ const columns = [
     sortable: true,
   },
   {
-    name: "Grade Level",
+    name: "Grade",
     selector: (row: MusicScore) => row.grade,
     sortable: true,
+    width: "100px",
   },
   {
     name: "Arrangement Type",
-    selector: (row: MusicScore) => row.arrangementType,
+    selector: (row: MusicScore) =>
+      row.arrangementType?.name || row.arrangementType?.code || "—",
     sortable: true,
   },
   {
     name: "Tags",
     selector: (row: MusicScore) => row.tags?.join(", ") || "",
+    wrap: true,
   },
 ];
 
 export default function MyScores() {
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [scores, setScores] = useState<MusicScore[]>([]);
@@ -57,7 +65,6 @@ export default function MyScores() {
 
     const fetchMyScores = async () => {
       try {
-        setLoading(true);
         const response = await api.get("/scores/my-scores");
         setScores(response.data);
       } catch (err: any) {
@@ -71,19 +78,20 @@ export default function MyScores() {
     fetchMyScores();
   }, [user, navigate]);
 
-  if (authLoading || loading)
-    return <div className="loading">Loading your scores...</div>;
+  if (loading) return <div className="loading">Loading your scores...</div>;
   if (error) return <div className="error-message">{error}</div>;
 
   return (
     <div className="my-scores-container">
       <h1>My Scores</h1>
       <p>
-        Logged in as: {user.accountName} ({user.accountType})
+        Logged in as: <strong>{user.accountName}</strong> ({user.accountType})
       </p>
 
       {scores.length === 0 ? (
-        <p>You don't have any scores yet. Start adding some!</p>
+        <p>
+          You don't have any scores yet. <strong>Start adding some!</strong>
+        </p>
       ) : (
         <DataTable
           columns={columns}
@@ -93,8 +101,16 @@ export default function MyScores() {
           pointerOnHover
           defaultSortFieldId={1}
           theme="dark" // optional — looks nice with your dark theme
+          onRowClicked={(row) => navigate(`/scores/${row.scoreId}`)} // ← clickable rows!
+          customStyles={tableCustomStyles} // ← defined in CSS file
         />
       )}
     </div>
   );
 }
+
+const tableCustomStyles = {
+  headRow: { style: { backgroundColor: "#101585", color: "#FFDD44" } },
+  rows: { style: { backgroundColor: "#1e1e4d", color: "white" } },
+  pagination: { style: { backgroundColor: "#101585", color: "white" } },
+};

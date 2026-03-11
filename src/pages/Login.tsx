@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import api from "../services/api";
+import { useAuth } from "../context/AuthContext";
 import "./Login.css";
 
 export default function Login() {
@@ -8,7 +9,7 @@ export default function Login() {
   const location = useLocation();
   const justLoggedOut =
     new URLSearchParams(location.search).get("logout") === "success";
-
+  const { refreshUser } = useAuth();
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -68,9 +69,10 @@ export default function Login() {
         },
       );
 
-      // If we get here → 200 OK JSON success
-      localStorage.setItem("isAuthenticated", "true");
-      setTimeout(() => navigate("/dashboard"), 1000);
+      await refreshUser();
+
+      //localStorage.setItem("isAuthenticated", "true");
+      setTimeout(() => navigate("/dashboard"), 800);
     } catch (error: any) {
       if (error.response?.status === 401) {
         setServerError("Invalid username or password.");

@@ -1,10 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import "./Dashboard.css";
 import { useEffect } from "react";
+import api from "../services/api";
+import "./Dashboard.css";
 
 export default function Dashboard() {
-  const { user, loading } = useAuth();
+  const { user, loading, refreshUser } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,6 +23,17 @@ export default function Dashboard() {
   const isOwner = user.accountType === "OWNER";
   const isCollaborator = user.accountType === "COLLABORATOR";
   const isAdmin = user.accountType === "ADMINISTRATOR";
+
+  const handleLogout = async () => {
+    try {
+      await api.post("/logout");
+      refreshUser();
+      navigate("/login?logout=success");
+    } catch (err) {
+      console.error("Logout failed", err);
+      navigate("/login");
+    }
+  };
 
   return (
     <div className="page-container">
@@ -104,7 +116,7 @@ export default function Dashboard() {
           )}
 
           {/* Always shown: Logout */}
-          <button onClick={() => navigate("/logout")} className="link-button">
+          <button onClick={handleLogout} className="link-button">
             Logout
           </button>
         </div>
