@@ -11,23 +11,16 @@ export interface TagEntry {
 export interface TagsListProps {
   tags: TagEntry[];
   setTags: React.Dispatch<React.SetStateAction<TagEntry[]>>;
-  existingTags: {
-    scoreTagId: number;
-    scoreId: number;
-    tag: string;
-  }[];
-  setExistingTags: React.Dispatch<
-    React.SetStateAction<
-      {
-        scoreTagId: number;
-        scoreId: number;
-        tag: string;
-      }[]
-    >
-  >;
+  existingTags: string[];
+  setExistingTags: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
-export default function TagsList({ tags, setTags }: TagsListProps) {
+export default function TagsList({
+  tags,
+  setTags,
+  existingTags,
+  setExistingTags,
+}: TagsListProps) {
   const [showPopup, setShowPopup] = useState(false);
 
   const removeTag = (index: number) => {
@@ -62,7 +55,18 @@ export default function TagsList({ tags, setTags }: TagsListProps) {
       <AddNewTagPopup
         open={showPopup}
         onClose={() => setShowPopup(false)}
-        onSuccess={(newTag) => setTags([...tags, newTag])}
+        existingTags={existingTags}
+        onSuccess={(newTag) => {
+          // Prevent duplicate tags on this score
+          if (tags.some((t) => t.tag === newTag.tag)) return;
+
+          setTags((prev) => [...prev, newTag]);
+
+          // Add to global dropdown list if it's truly new
+          if (!existingTags.includes(newTag.tag)) {
+            setExistingTags((prev) => [...prev, newTag.tag]);
+          }
+        }}
       />
     </div>
   );

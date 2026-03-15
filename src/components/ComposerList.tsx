@@ -98,7 +98,7 @@ export default function ComposerList({
       console.warn(
         `[SELECT] Invalid ID conversion: "${value}" → NaN - ignoring update`,
       );
-      return; // or keep previous value
+      return;
     }
 
     updateComposer(index, "composerId", parsedId);

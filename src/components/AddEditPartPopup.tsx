@@ -132,14 +132,14 @@ export default function AddEditPartPopup({
       setError("Part Count must be a valid number.");
     if (
       form.flexMinPart !== null &&
-      (isNaN(form.flexMinPart) || form.flexMinPart <= 0)
+      (isNaN(form.flexMinPart) || form.flexMinPart < 0)
     ) {
       setError("Flex Min Part must be a positive number.");
       return;
     }
     if (
       form.flexPartCount !== null &&
-      (isNaN(form.flexPartCount) || form.flexPartCount <= 0)
+      (isNaN(form.flexPartCount) || form.flexPartCount < 0)
     ) {
       setError("Flex Part Count must be a positive number.");
       return;

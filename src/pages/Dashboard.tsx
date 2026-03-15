@@ -37,7 +37,7 @@ export default function Dashboard() {
 
   return (
     <div className="page-container">
-      <div className="page-card">
+      <div className="page-card dashboard-card">
         <h1>
           Welcome back, <br />
           {user.accountName}!

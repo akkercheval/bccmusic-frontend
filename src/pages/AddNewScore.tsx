@@ -55,6 +55,7 @@ export default function AddNewScore() {
   const [existingComposers, setExistingComposers] = useState<
     { id: number; firstName?: string; middleName?: string; lastName: string }[]
   >([]);
+  const [existingTags, setExistingTags] = useState<{ tag: string }[]>([]);
   const [medleys, setMedleys] = useState<
     {
       medleyId?: number;
@@ -116,6 +117,10 @@ export default function AddNewScore() {
       .get("/vendors")
       .then((res) => setExistingVendors(res.data))
       .catch((err) => console.error("Failed to fetch vendors", err));
+    api
+      .get("/score-tags")
+      .then((res) => setExistingTags(res.data))
+      .catch((err) => console.error("Failed to fetch score tags", err));
   }, [loading, user]);
 
   if (loading) return <div>Loading...</div>;
@@ -225,9 +230,6 @@ export default function AddNewScore() {
     try {
       const response = await api.post("/scores", payload);
       setSuccessMessage("Score added successfully!");
-      // Optional: Reset form or navigate
-      // setFormData({ ...initialFormData });
-      // navigate("/scores");
     } catch (err: any) {
       console.error("Submit error:", err);
       setServerError(
@@ -402,8 +404,8 @@ export default function AddNewScore() {
         <TagsList
           tags={scoreTags}
           setTags={setScoreTags}
-          existingTags={scoreTags}
-          setExistingTags={setScoreTags}
+          existingTags={existingTags}
+          setExistingTags={setExistingTags}
         />
 
         <MedleyList

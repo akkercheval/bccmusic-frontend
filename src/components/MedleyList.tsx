@@ -7,6 +7,10 @@ export interface MedleyEntry {
   scoreId?: number;
   pieceTitle: string;
   composerId?: number;
+  firstName?: string;
+  middleName?: string;
+  lastName?: string;
+  fullName?: string;
 }
 
 export interface MedleyListProps {
