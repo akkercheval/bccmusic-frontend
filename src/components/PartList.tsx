@@ -3,6 +3,7 @@ import "./PartList.css";
 import AddEditPartPopup from "./AddEditPartPopup";
 
 export interface Part {
+  partId?: number;
   instrument: string;
   hasSolo: boolean;
   regularPartCount: number;

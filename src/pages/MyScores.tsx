@@ -100,9 +100,9 @@ export default function MyScores() {
           highlightOnHover
           pointerOnHover
           defaultSortFieldId={1}
-          theme="dark" // optional — looks nice with your dark theme
-          onRowClicked={(row) => navigate(`/scores/${row.scoreId}`)} // ← clickable rows!
-          customStyles={tableCustomStyles} // ← defined in CSS file
+          theme="dark"
+          onRowClicked={(row) => navigate(`/scores/${row.scoreId}`)}
+          customStyles={tableCustomStyles}
         />
       )}
     </div>

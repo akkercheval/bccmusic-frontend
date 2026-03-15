@@ -43,6 +43,8 @@ export default function AddNewTagPopup({
 
   const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
+    e.stopPropagation();
+
     setError(null);
 
     let tag: string;

@@ -4,6 +4,10 @@ import AddNewComposerPopup from "./AddEditComposerPopup";
 
 export interface ComposerEntry {
   composerId?: number;
+  firstName?: string;
+  middleName?: string;
+  lastName?: string;
+  fullName?: string;
   contributionType: string;
 }
 

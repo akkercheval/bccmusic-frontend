@@ -1,8 +1,11 @@
 .my-scores-container {
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  background-color: var(--primary-blue);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  padding: 2rem 2rem;
+  width: 100%;
   color: white;
+  text-align: center;
 }
 
 h1 {
@@ -26,24 +29,26 @@ h1 {
 
 /* Dark theme overrides for react-data-table-component */
 .rdt_Table {
-  background-color: #1e1e4d !important;
+  background-color: var(--primary-blue) !important;
   color: white !important;
+  font-size: 1.5rem;
 }
 
 .rdt_TableHeadRow {
-  background-color: #101585 !important;
+  background-color: var(--secondary-blue) !important;
+  font-weight: bold;
 }
 
 .rdt_TableRow {
-  background-color: #1e1e4d !important;
+  background-color: var(--primary-blue) !important;
   color: white !important;
 }
 
 .rdt_TableRow:hover {
-  background-color: #2a2a5e !important;
+  background-color: var(--secondary-blue) !important;
 }
 
 .rdt_Pagination {
-  background-color: #101585 !important;
+  background-color: var(--secondary-blue) !important;
   color: white !important;
-}
+} 

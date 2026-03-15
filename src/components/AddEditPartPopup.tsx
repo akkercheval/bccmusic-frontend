@@ -53,6 +53,7 @@ export default function AddEditPartPopup({
     "English Horn",
     "Clarinet (Eb Soprano)",
     "Clarinet (Bb Soprano)",
+    "Clarinet (Eb Alto)",
     "Clarinet (Bb Bass)",
     "Bassoon",
     "Contrabassoon",
@@ -66,7 +67,8 @@ export default function AddEditPartPopup({
     "Trombone",
     "Bass Trombone",
     "Tuba",
-    "Euphonium",
+    "Baritone (Bass clef)",
+    "Baritone (Treble clef)",
     "Violin",
     "Viola",
     "Cello",
@@ -118,6 +120,8 @@ export default function AddEditPartPopup({
 
   const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
+    e.stopPropagation();
+
     setError(null);
     if (!form.instrument) {
       setError("Instrument is required.");

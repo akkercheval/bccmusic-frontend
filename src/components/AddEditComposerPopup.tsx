@@ -27,6 +27,8 @@ export default function AddEditComposerPopup({
 
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
+    e.stopPropagation();
+
     setError(null);
 
     if (!lastName.trim()) {

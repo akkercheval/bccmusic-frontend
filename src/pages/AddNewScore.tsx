@@ -165,8 +165,8 @@ export default function AddNewScore() {
     setErrors((prev) => ({ ...prev, [name]: error }));
   };
 
-  const handleSubmit = async (e: React.SubmitEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.SyntheticEvent) => {
+    e?.preventDefault();
     setErrors({});
     setServerError(null);
     setSuccessMessage(null);
@@ -413,7 +413,7 @@ export default function AddNewScore() {
           setExistingComposers={setExistingComposers}
         />
 
-        <button type="submit" disabled={isLoading}>
+        <button type="button" onClick={handleSubmit} disabled={isLoading}>
           {isLoading ? "Adding Score..." : "Add Score"}
         </button>
       </form>

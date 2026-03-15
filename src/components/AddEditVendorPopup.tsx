@@ -44,6 +44,8 @@ export default function AddNewComposerPopup({
 
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
+    e.stopPropagation();
+
     setError(null);
 
     if (!vendorName.trim()) {
