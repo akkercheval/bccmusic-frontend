@@ -155,17 +155,17 @@ export default function ViewEditScore() {
         <div className="score-details">
           <h2>{score.scoreTitle}</h2>
           {score.owner && (
-            <p>
+            <div>
               <strong>Owner:</strong> {score.owner.accountName}
-            </p>
+            </div>
           )}
           {score.scoreSubtitle && (
-            <p>
+            <div>
               <strong>Subtitle:</strong> {score.scoreSubtitle}
-            </p>
+            </div>
           )}
           {score.scoreComposers && score.scoreComposers.length > 0 && (
-            <p>
+            <div>
               {score.scoreComposers.map((c, i) => {
                 const name =
                   c.composer.fullName ||
@@ -188,89 +188,92 @@ export default function ViewEditScore() {
                   </span>
                 );
               })}
-            </p>
+            </div>
           )}
 
           {/* Medleys */}
           {score.medleys && score.medleys.length > 0 && (
-            <p>
+            <div>
               <strong>Medleys:</strong>
-              <br />
-              {score.medleys.map((m, i) => (
-                <span key={i}>
-                  {m.pieceTitle} by{" "}
-                  {m.composer?.fullName ||
-                    `Composer #${m.composer?.composerId}`}
-                  {i < score.medleys.length - 1 ? <br /> : ""}
-                </span>
-              ))}
-            </p>
+              <div className="indented-list">
+                {score.medleys.map((m, i) => (
+                  <p key={i}>
+                    {m.pieceTitle} by{" "}
+                    {m.composer?.fullName ||
+                      `Composer #${m.composer?.composerId}`}
+                    {i < score.medleys.length - 1 ? <br /> : ""}
+                  </p>
+                ))}
+              </div>
+            </div>
           )}
 
-          <p>
+          <div>
             <strong>Grade:</strong> {score.grade ?? "—"}
-          </p>
+          </div>
 
           {score.arrangementType && (
-            <p>
+            <div>
               <strong>Arrangement Type:</strong>{" "}
               {score.arrangementType.name || score.arrangementType.code}
-            </p>
+            </div>
           )}
 
           {score.purchasedFrom && (
-            <p>
+            <div>
               <strong>Purchased From:</strong> {score.purchasedFrom.vendorName}
-            </p>
+            </div>
           )}
 
           {score.purchasedDate && (
-            <p>
+            <div>
               <strong>Purchased Date:</strong> {score.purchasedDate}
-            </p>
+            </div>
           )}
 
           {score.purchasedCost !== undefined && (
-            <p>
+            <div>
               <strong>Purchased Cost:</strong> ${score.purchasedCost.toFixed(2)}
-            </p>
+            </div>
           )}
 
           {/* Parts with proper Flex Parts line */}
           {score.parts && score.parts.length > 0 && (
-            <p>
+            <div>
               <strong>Parts:</strong>
-              {score.parts.map((part) => {
-                let flexStr = "";
-                if (
-                  part.flexMinPart !== null &&
-                  part.flexPartCount !== null &&
-                  part.flexPartCount > 0
-                ) {
-                  const flexNumbers = Array.from(
-                    { length: part.flexPartCount },
-                    (_, i) => part.flexMinPart! + i,
-                  );
-                  flexStr = `Flex Parts: ${flexNumbers.join(", ")}`;
-                }
+              <div className="indented-list">
+                {score.parts.map((part) => {
+                  let flexStr = "";
+                  if (
+                    part.flexMinPart !== null &&
+                    part.flexPartCount !== null &&
+                    part.flexPartCount > 0
+                  ) {
+                    const flexNumbers = Array.from(
+                      { length: part.flexPartCount },
+                      (_, i) => part.flexMinPart! + i,
+                    );
+                    flexStr = `Flex Parts: ${flexNumbers.join(", ")}`;
+                  }
 
-                return (
-                  <p key={part.partId || part.instrument} className="part-row">
-                    {part.instrument} — Regular: {part.regularPartCount}
-                    {part.hasSolo && " (Solo)"}
-                    {flexStr && ` — ${flexStr}`}
-                  </p>
-                );
-              })}
-            </p>
+                  return (
+                    <p key={part.partId || part.instrument}>
+                      {part.instrument} — Total Parts: {part.regularPartCount}
+                      {part.hasSolo && " (Solo)"}
+                      {flexStr && ` — ${flexStr}`}
+                    </p>
+                  );
+                })}
+              </div>
+            </div>
           )}
 
           {/* Tags */}
           {score.scoreTags && score.scoreTags.length > 0 && (
-            <p>
+            <div>
               <strong>Tags:</strong>{" "}
               {score.scoreTags.map((t) => t.tag).join(", ")}
-            </p>
+            </div>
           )}
         </div>
 
