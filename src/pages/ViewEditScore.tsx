@@ -167,6 +167,7 @@ export default function ViewEditScore() {
       grade: score.grade || null,
       arrangementType: score.arrangementType,
       scoreComposers: scoreComposers.map((c) => ({
+        scoreComposerId: c.scoreComposerId ?? null,
         composer: { composerId: c.composer?.composerId || c.composerId },
         contributionType: c.contributionType,
       })),
@@ -206,6 +207,9 @@ export default function ViewEditScore() {
     };
 
     console.log("Saving score with payload:", payload);
+    console.log("Parts payload:", parts);
+    console.log("Tags payload:", scoreTags);
+    console.log("Medleys payload:", medleys);
 
     try {
       await api.put(`/scores/${scoreId}`, payload);
