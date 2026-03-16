@@ -56,7 +56,8 @@ const NavBar = () => {
       </button>
 
       <ul className={`nav-links ${isMenuOpen ? "active" : ""}`}>
-        <li className="nav-item">
+        {/*  
+      <li className="nav-item">
           <Link
             to="/account/update"
             className={location.pathname === "/account/update" ? "active" : ""}
@@ -64,11 +65,12 @@ const NavBar = () => {
           >
             Update My Account
           </Link>
-        </li>
+        </li> 
+      */}
         <li className="nav-item">
           <Link
-            to="/search-scores"
-            className={location.pathname === "/search-scores" ? "active" : ""}
+            to="/all-scores"
+            className={location.pathname === "/all-scores" ? "active" : ""}
             onClick={closeMenu}
           >
             Search All Scores
@@ -100,6 +102,7 @@ const NavBar = () => {
                 Add a New Score
               </Link>
             </li>
+            {/*}
             <li className="nav-item">
               <Link
                 to="/manage-collaborators"
@@ -110,7 +113,7 @@ const NavBar = () => {
               >
                 Manage Collaborators
               </Link>
-            </li>
+            </li> */}
           </>
         )}
         {isAdmin && (

@@ -1,0 +1,208 @@
+.all-scores-container {
+  background-color: var(--primary-blue);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  padding: 2rem;
+  width: 100%;
+  max-width: 1400px; /* prevents it from becoming too wide on large screens */
+  color: white;
+  text-align: center;
+  margin: 1rem auto;
+}
+
+.all-scores-container h1 {
+  color: var(--primary-yellow);
+  margin-bottom: 1.5rem;
+}
+
+.search-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.search-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.search-group label {
+  color: var(--text-light);
+  white-space: nowrap;
+}
+
+.search-group input {
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background-color: var(--input-bg);
+  color: var(--text-light);
+  min-width: 220px;
+}
+
+.search-group input::placeholder {
+  color: #888;
+}
+
+.no-results {
+  font-size: 1.3rem;
+  color: var(--text-light);
+  margin: 3rem 0;
+}
+
+/* Fix header truncation + improve readability */
+.rdt_TableHeadRow {
+  background-color: #0d126e !important; /* slightly darker blue for contrast */
+}
+
+.rdt_TableCol {
+  white-space: normal !important;
+  word-break: break-word !important;
+  overflow: visible !important;
+  padding: 8px 12px !important;
+}
+
+.rdt_TableHeadRow div[id="grade"],
+.rdt_TableHeadRow div[id="arrangementType"] {
+  min-width: 140px !important; /* give Grade and Arrangement Type more breathing room */
+}
+
+.rdt_TableHeadRow div[id="tags"] {
+  min-width: 220px !important;
+}
+
+/* Existing dark theme overrides – keep or adjust as needed */
+.rdt_Table {
+  background-color: var(--primary-blue) !important;
+  color: white !important;
+}
+
+.rdt_TableRow {
+  background-color: var(--primary-blue) !important;
+  color: white !important;
+}
+
+.rdt_TableRow:hover {
+  background-color: #1a1f9e !important; /* subtle hover */
+}
+
+.rdt_Pagination {
+  background-color: #0d126e !important;
+  color: white !important;
+}
+
+/* Loading & error – reuse shared if possible, but keep specific */
+.loading,
+.error-message {
+  padding: 4rem 1rem;
+  font-size: 1.4rem;
+}
+
+.error-message {
+  color: var(--accent-red);
+}
+
+.select__control {
+  font-size: 1rem !important;
+  background-color: var(--input-bg) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 6px !important;
+  min-height: 38px !important; /* roughly matches your other inputs */
+  box-shadow: none !important;
+  transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+
+.select__control:hover {
+  border-color: var(--primary-yellow) !important;
+}
+
+.select__control--is-focused {
+  border-color: var(--primary-yellow) !important;
+  box-shadow: 0 0 0 3px rgba(255, 221, 68, 0.25) !important;
+}
+
+.select__value-container {
+  font-size: 1rem !important;
+  color: var(--text-light) !important;
+  padding: 2px 8px !important;
+}
+
+.select__input input {
+  font-size: 1rem !important;
+  color: var(--text-light) !important;
+}
+
+.select__placeholder {
+  font-size: 1rem !important;
+  color: #888 !important;
+  opacity: 0.7 !important;
+}
+
+.select__menu {
+  background-color: var(--primary-blue) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 6px !important;
+  margin-top: 4px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+}
+
+.select__menu-list {
+  padding: 4px 0 !important;
+}
+
+.select__option {
+  background-color: var(--primary-blue) !important;
+  color: var(--text-light) !important;
+  padding: 8px 12px !important;
+  font-size: 1rem !important;
+}
+
+.select__option--is-focused {
+  background-color: rgba(255, 221, 68, 0.15) !important;
+}
+
+.select__option--is-selected {
+  background-color: var(--primary-yellow) !important;
+  color: var(--primary-blue) !important;
+  font-weight: 500 !important;
+}
+
+/* Chips (selected values) */
+.select__multi-value {
+  background-color: var(--primary-yellow) !important;
+  border-radius: 4px !important;
+}
+
+.select__multi-value__label {
+  font-size: 1rem !important;
+  color: var(--primary-blue) !important;
+  font-weight: 500 !important;
+}
+
+.select__multi-value__remove {
+  color: var(--primary-blue) !important;
+  background-color: transparent !important;
+}
+
+.select__multi-value__remove:hover {
+  background-color: var(--hover-red) !important;
+  color: white !important;
+}
+
+/* Dropdown indicator & clear button */
+.select__indicator-separator {
+  background-color: var(--border) !important;
+}
+
+.select__dropdown-indicator,
+.select__clear-indicator {
+  color: var(--text-light) !important;
+}
+
+.select__dropdown-indicator:hover,
+.select__clear-indicator:hover {
+  color: var(--primary-yellow) !important;
+}

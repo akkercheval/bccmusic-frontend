@@ -11,6 +11,7 @@ import AddNewScore from "./pages/AddNewScore.tsx";
 import ViewEditScore from "./pages/ViewEditScore.tsx";
 import PrivateLayout from "./components/PrivateLayout.tsx";
 import "./styles/shared.css";
+import AllScores from "./pages/AllScores.tsx";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -25,6 +26,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             <Route path="/my-scores" element={<MyScores />} />
             <Route path="/add-new-score" element={<AddNewScore />} />
             <Route path="/scores/:scoreId" element={<ViewEditScore />} />
+            <Route path="/all-scores" element={<AllScores />} />
           </Route>
           {/* Optional: 404 fallback */}
           <Route path="*" element={<h1>404 - Page Not Found</h1>} />

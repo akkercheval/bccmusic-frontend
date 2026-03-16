@@ -48,16 +48,17 @@ export default function Dashboard() {
 
         <div className="button-group">
           {/* Always shown: Update My Account */}
+          {/*}
           <button
             onClick={() => navigate("/account/update")}
             className="link-button"
           >
             Update My Account
-          </button>
+          </button> */}
 
           {/* Always shown: Search All Scores */}
           <button
-            onClick={() => navigate("/search-scores")}
+            onClick={() => navigate("/all-scores")}
             className="link-button"
           >
             Search All Scores
@@ -84,6 +85,7 @@ export default function Dashboard() {
           )}
 
           {/* Owner / Admin: Manage My Collaborators */}
+          {/*
           {(isOwner || isAdmin) && (
             <button
               onClick={() => navigate("/manage-collaborators")}
@@ -92,6 +94,7 @@ export default function Dashboard() {
               Manage Collaborators
             </button>
           )}
+            */}
 
           {/* Collaborator with SCORE_COLLAB_EDIT: View/Manage Other Accounts (future) */}
           {/* We'll add this later when you implement the permission check */}

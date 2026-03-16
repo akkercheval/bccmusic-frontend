@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 import "./ViewEditScore.css";
@@ -51,7 +51,10 @@ interface MusicScore {
 export default function ViewEditScore() {
   const { scoreId } = useParams<{ scoreId: string }>();
   const { user } = useAuth();
+  const location = useLocation();
   const navigate = useNavigate();
+
+  const backInfo = location.state?.from as string | undefined;
 
   const [score, setScore] = useState<MusicScore | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -103,6 +106,21 @@ export default function ViewEditScore() {
   >([]);
 
   const canEdit = user && score && user.accountId === score.owner.accountId;
+
+  const handleGoBack = () => {
+    if (backInfo) {
+      if (backInfo === "all-scores") {
+        navigate("/all-scores");
+      } else if (backInfo === "my-scores") {
+        navigate("/my-scores");
+      } else {
+        navigate(-1); // fallback
+      }
+    } else {
+      // No state → probably direct link or refresh → safe back or fallback
+      navigate(-1);
+    }
+  };
 
   useEffect(() => {
     const loadAll = async () => {
@@ -243,12 +261,15 @@ export default function ViewEditScore() {
         {!isEditing && (
           <div className="score-details">
             <h2>{score.scoreTitle}</h2>
-            <button
-              onClick={() => navigate("/my-scores")}
-              className="back-button"
-            >
-              ← Back to My Scores
-            </button>
+            <div className="header-actions">
+              <button
+                type="button"
+                className="primary-button"
+                onClick={handleGoBack}
+              >
+                ← Back to List
+              </button>
+            </div>
             {score.owner && (
               <div>
                 <strong>Owner:</strong> {score.owner.accountName}

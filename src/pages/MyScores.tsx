@@ -101,7 +101,9 @@ export default function MyScores() {
           pointerOnHover
           defaultSortFieldId={1}
           theme="dark"
-          onRowClicked={(row) => navigate(`/scores/${row.scoreId}`)}
+          onRowClicked={(row) =>
+            navigate(`/scores/${row.scoreId}`, { state: { from: "my-scores" } })
+          }
           customStyles={tableCustomStyles}
         />
       )}
