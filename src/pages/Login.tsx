@@ -131,7 +131,7 @@ export default function Login() {
             )}
           </div>
 
-          <button type="submit" disabled={isLoading} className="login-button">
+          <button type="submit" disabled={isLoading} className="primary-button">
             {isLoading ? "Logging in..." : "Log In"}
           </button>
         </form>
@@ -141,7 +141,7 @@ export default function Login() {
           <button
             type="button"
             onClick={() => navigate("/register")}
-            className="register-link-button"
+            className="primary-button"
           >
             Create a New Account
           </button>

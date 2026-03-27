@@ -85,16 +85,14 @@ export default function Dashboard() {
           )}
 
           {/* Owner / Admin: Manage My Collaborators */}
-          {/*
-          {(isOwner || isAdmin) && (
+          {isOwner && (
             <button
-              onClick={() => navigate("/manage-collaborators")}
+              onClick={() => navigate("/my-collaborators")}
               className="link-button"
             >
-              Manage Collaborators
+              Manage My Collaborators
             </button>
           )}
-            */}
 
           {/* Collaborator with SCORE_COLLAB_EDIT: View/Manage Other Accounts (future) */}
           {/* We'll add this later when you implement the permission check */}

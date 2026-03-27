@@ -1,4 +1,4 @@
-.my-scores-container {
+.my-collaborators-container {
   background-color: var(--primary-blue);
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
@@ -25,7 +25,6 @@ h1 {
   padding: 4rem;
 }
 
-/* Dark theme overrides for react-data-table-component */
 .rdt_Table {
   background-color: var(--primary-blue) !important;
   color: white !important;

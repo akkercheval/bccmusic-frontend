@@ -85,7 +85,7 @@ export default function MyScores() {
     <div className="my-scores-container">
       <h1>My Scores</h1>
       <p>
-        Logged in as: <strong>{user.accountName}</strong> ({user.accountType})
+        Logged in as: <strong>{user.accountName}</strong>
       </p>
 
       {scores.length === 0 ? (

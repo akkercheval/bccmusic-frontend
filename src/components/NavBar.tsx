@@ -87,6 +87,17 @@ const NavBar = () => {
                 My Scores
               </Link>
             </li>
+            <li className="nav-item">
+              <Link
+                to="/my-collaborators"
+                className={
+                  location.pathname === "/my-collaborators" ? "active" : ""
+                }
+                onClick={closeMenu}
+              >
+                My Collaborators
+              </Link>
+            </li>
           </>
         )}
         {(isOwner || isAdmin || isCollaborator) && (
@@ -102,18 +113,6 @@ const NavBar = () => {
                 Add a New Score
               </Link>
             </li>
-            {/*}
-            <li className="nav-item">
-              <Link
-                to="/manage-collaborators"
-                className={
-                  location.pathname === "/manage-collaborators" ? "active" : ""
-                }
-                onClick={closeMenu}
-              >
-                Manage Collaborators
-              </Link>
-            </li> */}
           </>
         )}
         {isAdmin && (
