@@ -7,9 +7,9 @@ export interface Part {
   instrument: string;
   hasSolo: boolean;
   regularPartCount: number;
-  flexMinPart?: number;
-  flexPartCount?: number;
-  partComments?: string;
+  flexMinPart?: number | null;
+  flexPartCount?: number | null;
+  partComments?: string | null;
 }
 
 interface PartListProps {
@@ -25,11 +25,11 @@ export default function PartList({ parts, setParts }: PartListProps) {
     const cleanedData: Part = {
       ...savedPart,
       flexMinPart:
-        savedPart.flexMinPart !== undefined && savedPart.flexMinPart > 0
+        savedPart.flexMinPart != null && savedPart.flexMinPart > 0
           ? savedPart.flexMinPart
           : undefined,
       flexPartCount:
-        savedPart.flexPartCount !== undefined && savedPart.flexPartCount > 0
+        savedPart.flexPartCount != null && savedPart.flexPartCount > 0
           ? savedPart.flexPartCount
           : undefined,
       partComments: savedPart.partComments?.trim() || undefined,
@@ -109,7 +109,16 @@ export default function PartList({ parts, setParts }: PartListProps) {
         open={showPopup}
         onClose={handleCancelPart}
         onSuccess={handleSavePart}
-        initialPart={editingIndex !== null ? parts[editingIndex] : undefined}
+        initialPart={
+          editingIndex !== null
+            ? {
+                ...parts[editingIndex],
+                flexMinPart: parts[editingIndex].flexMinPart ?? undefined,
+                flexPartCount: parts[editingIndex].flexPartCount ?? undefined,
+                partComments: parts[editingIndex].partComments ?? undefined,
+              }
+            : undefined
+        }
       />
     </div>
   );
