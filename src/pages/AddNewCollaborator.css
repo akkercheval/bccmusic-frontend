@@ -1,0 +1,15 @@
+.new-collaborator-form {
+  text-align: left;
+  width: 100%;
+  max-width: 800px; 
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: var(--primary-blue);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  color: white;
+  min-height: 80vh; 
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}

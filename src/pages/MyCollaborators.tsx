@@ -86,7 +86,12 @@ export default function MyCollaborators() {
       <p>
         Logged in as: <strong>{user.accountName}</strong>
       </p>
-
+      <button
+        onClick={() => navigate("/add-collaborator")}
+        className="primary-button"
+      >
+        Add a New Collaborator
+      </button>
       {collaborators.length === 0 ? (
         <p>You don't have any collaborators yet.</p>
       ) : (

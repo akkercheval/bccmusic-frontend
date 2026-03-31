@@ -10,15 +10,8 @@ import "./AddNewScore.css";
 import TagsList from "../components/TagsList";
 import MedleyList from "../components/MedleyList";
 import type { Account } from "../types/Account";
+import type { CollaborationAccount } from "../types/CollaborationAccount";
 import AddEditVendorPopup from "../components/AddEditVendorPopup";
-
-interface CollaborationAccount {
-  ownerAccountId: number;
-  ownerAccountName: string;
-  collaboratorAccountId: number;
-  collaboratorAccountName: string;
-  permissionLevel: string;
-}
 
 interface Vendor {
   vendorId: number;
