@@ -70,10 +70,10 @@ export default function PartList({ parts, setParts }: PartListProps) {
               <span className="part-details">
                 {part.instrument} - Regular Count: {part.regularPartCount},
                 Solo: {part.hasSolo ? "Yes" : "No"}
-                {part.flexMinPart ? `, Flex Min: ${part.flexMinPart}` : ""}
+                {part.flexMinPart ? `, Flex Min: ${part.flexMinPart}` : null}
                 {part.flexPartCount
                   ? `, Flex Count: ${part.flexPartCount}`
-                  : ""}
+                  : null}
                 {part.partComments ? ` - Comments: ${part.partComments}` : ""}
               </span>
               <button

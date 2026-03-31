@@ -1,4 +1,3 @@
-import React from "react";
 import AccountButtons from "../components/AccountButtons";
 import "./Home.css";
 

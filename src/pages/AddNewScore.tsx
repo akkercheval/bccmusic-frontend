@@ -46,9 +46,14 @@ export default function AddNewScore() {
     { code: string; name: string }[]
   >([]);
   const [existingComposers, setExistingComposers] = useState<
-    { id: number; firstName?: string; middleName?: string; lastName: string }[]
+    {
+      composerId: number;
+      firstName?: string;
+      middleName?: string;
+      lastName: string;
+    }[]
   >([]);
-  const [existingTags, setExistingTags] = useState<{ tag: string }[]>([]);
+  const [existingTags, setExistingTags] = useState<string[]>([]);
   const [medleys, setMedleys] = useState<
     {
       medleyId?: number;
@@ -112,7 +117,9 @@ export default function AddNewScore() {
       .catch((err) => console.error("Failed to fetch vendors", err));
     api
       .get("/score-tags")
-      .then((res) => setExistingTags(res.data))
+      .then((res) =>
+        setExistingTags(res.data.map((t: { tag: string }) => t.tag)),
+      )
       .catch((err) => console.error("Failed to fetch score tags", err));
   }, [loading, user]);
 
@@ -221,7 +228,7 @@ export default function AddNewScore() {
     console.log("Submitting payload:", payload); // Debug to verify structure
 
     try {
-      const response = await api.post("/scores", payload);
+      await api.post("/scores", payload);
       setSuccessMessage("Score added successfully!");
     } catch (err: any) {
       console.error("Submit error:", err);

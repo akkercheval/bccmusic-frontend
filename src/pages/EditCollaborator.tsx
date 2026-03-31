@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
@@ -13,17 +13,20 @@ export default function EditCollaborator() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [canEdit, setCanEdit] = useState(false);
 
   // Load collaborator details + permission check
   useEffect(() => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
     const loadData = async () => {
       try {
         // 1. Check if current user can edit this collaboration
         const permRes = await api.get(
           `/collaborators/${collaboratorId}/can-edit`,
         );
-        setCanEdit(permRes.data);
 
         if (!permRes.data) {
           setError("You do not have permission to edit this collaboration.");
@@ -49,7 +52,7 @@ export default function EditCollaborator() {
     };
 
     if (collaboratorId) loadData();
-  }, [collaboratorId]);
+  }, [collaboratorId, navigate, user]);
 
   const handleSave = async () => {
     if (!collaborator) return;

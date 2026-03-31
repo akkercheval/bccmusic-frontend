@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
@@ -10,6 +10,8 @@ import TagsList from "../components/TagsList";
 import MedleyList from "../components/MedleyList";
 
 import type { Part } from "../components/PartList";
+
+type TagEntry = { scoreTagId?: number; tag: string };
 
 interface MusicScore {
   scoreId: number;
@@ -34,7 +36,7 @@ interface MusicScore {
     contributionType: string;
   }[];
   parts: Part[];
-  scoreTags: { scoreTagId: number; tag: string }[];
+  scoreTags: TagEntry[];
   medleys: {
     medleyId: number;
     pieceTitle: string;
@@ -76,9 +78,7 @@ export default function ViewEditScore() {
     }[]
   >([]);
   const [parts, setParts] = useState<Part[]>([]);
-  const [scoreTags, setScoreTags] = useState<
-    { scoreTagId: number; tag: string }[]
-  >([]);
+  const [scoreTags, setScoreTags] = useState<TagEntry[]>([]);
   const [medleys, setMedleys] = useState<
     {
       medleyId: number;
@@ -186,14 +186,14 @@ export default function ViewEditScore() {
       arrangementType: score.arrangementType,
       scoreComposers: scoreComposers.map((c) => ({
         scoreComposerId: c.scoreComposerId ?? null,
-        composer: { composerId: c.composer?.composerId || c.composerId },
+        composer: { composerId: c.composer?.composerId },
         contributionType: c.contributionType,
       })),
       parts: parts,
       scoreTags: scoreTags,
       medleys: medleys.map((m) => {
         const composerInfo = existingComposers.find(
-          (c) => c.composerId === m.composerId,
+          (c) => c.composerId === m.composer.composerId,
         );
 
         const displayName =
@@ -203,7 +203,7 @@ export default function ViewEditScore() {
             composerInfo?.lastName,
           ]
             .filter(Boolean)
-            .join(" ") || `Composer #${m.composerId || "unknown"}`;
+            .join(" ") || `Composer #${m.composer.composerId || "unknown"}`;
 
         return {
           pieceTitle: m.pieceTitle,
@@ -217,7 +217,7 @@ export default function ViewEditScore() {
                 fullName: displayName,
               }
             : {
-                composerId: m.composerId,
+                composerId: m.composer.composerId,
                 lastName: "Unknown Composer",
               }, // fallback (should never hit after a successful select)
         };
@@ -363,8 +363,8 @@ export default function ViewEditScore() {
                   {score.parts.map((part) => {
                     let flexStr = "";
                     if (
-                      part.flexMinPart !== null &&
-                      part.flexPartCount !== null &&
+                      part.flexMinPart != null &&
+                      part.flexPartCount != null &&
                       part.flexPartCount > 0
                     ) {
                       const flexNumbers = Array.from(
@@ -505,13 +505,13 @@ export default function ViewEditScore() {
             </div>{" "}
             <ComposerList
               composers={scoreComposers}
-              setComposers={setScoreComposers}
+              setComposers={setScoreComposers as any}
               existingComposers={existingComposers}
               setExistingComposers={setExistingComposers}
             />
             <MedleyList
               medleys={medleys}
-              setMedleys={setMedleys}
+              setMedleys={setMedleys as any}
               existingComposers={existingComposers}
               setExistingComposers={setExistingComposers}
             />

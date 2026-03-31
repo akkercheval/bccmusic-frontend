@@ -92,6 +92,34 @@ export default function AllScores() {
       return;
     }
 
+    const fetchScores = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const params: any = {
+          page,
+          size: perPage,
+          sort: `${sortField},${sortDirection}`,
+        };
+
+        if (debouncedTitle.trim()) params.title = debouncedTitle.trim();
+        if (selectedTags.length > 0) params.tags = selectedTags;
+
+        const response = await api.get<SearchResponse>("/scores/search", {
+          params,
+        });
+
+        setScores(response.data.content);
+        setTotalRows(response.data.totalElements);
+      } catch (err: any) {
+        setError(err.response?.data?.message || "Failed to load scores");
+        console.error("Error fetching scores:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     const loadTags = async () => {
       try {
         const res = await api.get<string[]>("/score-tags");
@@ -113,34 +141,6 @@ export default function AllScores() {
     selectedTags,
   ]);
 
-  const fetchScores = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const params: any = {
-        page,
-        size: perPage,
-        sort: `${sortField},${sortDirection}`,
-      };
-
-      if (debouncedTitle.trim()) params.title = debouncedTitle.trim();
-      if (selectedTags.length > 0) params.tags = selectedTags;
-
-      const response = await api.get<SearchResponse>("/scores/search", {
-        params,
-      });
-
-      setScores(response.data.content);
-      setTotalRows(response.data.totalElements);
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to load scores");
-      console.error("Error fetching scores:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handlePageChange = (newPage: number) => setPage(newPage - 1);
 
   const handlePerRowsChange = (newPerPage: number, newPage: number) => {
@@ -158,18 +158,6 @@ export default function AllScores() {
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitleFilter(e.target.value);
-    setPage(0);
-  };
-
-  const handleTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.trim();
-    const newTags = value
-      ? value
-          .split(",")
-          .map((t) => t.trim())
-          .filter(Boolean)
-      : [];
-    setTagsFilter(newTags);
     setPage(0);
   };
 

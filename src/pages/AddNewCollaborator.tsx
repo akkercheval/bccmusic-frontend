@@ -18,7 +18,7 @@ export default function AddNewCollaborator() {
   const [selectedAccountId, setSelectedAccountId] = useState<number | null>(
     null,
   );
-  const [permissionLevel, setPermissionLevel] = useState<string | null>(null);
+  const [permissionLevel, setPermissionLevel] = useState<string>("VIEW_ONLY");
 
   useEffect(() => {
     if (!user) {
@@ -80,6 +80,13 @@ export default function AddNewCollaborator() {
       <h2>Add New Collaborator</h2>
 
       {serverError && <div className="server-error">{serverError}</div>}
+      {errors && (
+        <div className="validation-errors">
+          {Object.values(errors).map((err, idx) => (
+            <div key={idx}>{err}</div>
+          ))}
+        </div>
+      )}
       {successMessage && <div className="success">{successMessage}</div>}
 
       <div className="form-group">
@@ -87,7 +94,11 @@ export default function AddNewCollaborator() {
         <select
           id="account-select"
           value={selectedAccountId ?? ""}
-          onChange={(e) => setSelectedAccountId(Number(e.target.value))}
+          onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+            setSelectedAccountId(
+              e.target.value === "" ? null : Number(e.target.value),
+            )
+          }
         >
           <option value="" disabled>
             -- Select an account --
