@@ -13,6 +13,7 @@ COPY . .
 RUN echo "=== VITE Environment Variables ===" && \
     env | grep VITE_ || echo "No VITE_ variables found" && \
     echo "=== Running build ===" && \
+    ENV NODE_ENV=production
     npm run build
 
 # Stage 2: Serve with Nginx
