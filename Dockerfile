@@ -8,15 +8,16 @@ RUN npm ci --frozen-lockfile
 
 # Copy source code
 COPY . .
-RUN npm run build
 
-# Stage 2: Serve with Nginx + SPA routing
+# Show environment and run build with more verbose output
+RUN echo "=== VITE Environment Variables ===" && \
+    env | grep VITE_ || echo "No VITE_ variables found" && \
+    echo "=== Running build ===" && \
+    npm run build
+
+# Stage 2: Serve with Nginx
 FROM nginx:alpine
-
-# Copy custom nginx config for React Router / Vite SPA (client-side routing)
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Copy the built files (Vite default output is "dist")
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 EXPOSE 80
