@@ -50,12 +50,18 @@ const columns = [
 ];
 
 export default function MyScores() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
 
   const [scores, setScores] = useState<MusicScore[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate("/login");
+    }
+  }, [user, loading, navigate]);
 
   useEffect(() => {
     if (!user) {
@@ -71,14 +77,16 @@ export default function MyScores() {
         setError(err.response?.data?.message || "Failed to load your scores");
         console.error("Error fetching scores:", err);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
     fetchMyScores();
   }, [user, navigate]);
 
-  if (loading) return <div className="loading">Loading your scores...</div>;
+  if (loading) return <div className="loading">Loading...</div>;
+  if (!user) return null;
+  if (isLoading) return <div className="loading">Loading your scores...</div>;
   if (error) return <div className="error-message">{error}</div>;
 
   return (

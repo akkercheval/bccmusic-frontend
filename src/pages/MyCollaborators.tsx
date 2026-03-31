@@ -48,17 +48,20 @@ const columns = [
 ];
 
 export default function MyCollaborators() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isloading, setisLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user) {
+    if (!loading && !user) {
       navigate("/login");
-      return;
     }
+  }, [user, loading, navigate]);
+
+  useEffect(() => {
+    if (!user) return;
 
     const fetchMyCollaborators = async () => {
       try {
@@ -70,13 +73,16 @@ export default function MyCollaborators() {
         );
         console.error("Error fetching collaborators:", err);
       } finally {
-        setLoading(false);
+        setisLoading(false);
       }
     };
 
     fetchMyCollaborators();
-  }, [user, navigate]);
-  if (loading)
+  }, [user]);
+
+  if (loading) return <div className="loading">Loading...</div>;
+  if (!user) return null;
+  if (isloading)
     return <div className="loading">Loading your Collaborators...</div>;
   if (error) return <div className="error-message">{error}</div>;
 
