@@ -14,6 +14,7 @@ import AddNewCollaborator from "./pages/AddNewCollaborator.tsx";
 import AllScores from "./pages/AllScores.tsx";
 import PrivateLayout from "./components/PrivateLayout.tsx";
 import "./styles/shared.css";
+import EditCollaborator from "./pages/EditCollaborator.tsx";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -31,6 +32,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             <Route path="/all-scores" element={<AllScores />} />
             <Route path="/my-collaborators" element={<MyCollaborators />} />
             <Route path="/add-collaborator" element={<AddNewCollaborator />} />
+            <Route
+              path="/collaborators/:collaboratorId"
+              element={<EditCollaborator />}
+            />
           </Route>
           {/* Optional: 404 fallback */}
           <Route path="*" element={<h1>404 - Page Not Found</h1>} />

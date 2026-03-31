@@ -18,7 +18,7 @@ export default function AddNewCollaborator() {
   const [selectedAccountId, setSelectedAccountId] = useState<number | null>(
     null,
   );
-  const [permissionLevel, setPermissionLevel] = useState<string>("read");
+  const [permissionLevel, setPermissionLevel] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) {

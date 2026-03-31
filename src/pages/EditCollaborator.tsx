@@ -1,92 +1,127 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 
 export default function EditCollaborator() {
-  const { collaboratorId } = useParams();
+  const { collaboratorId } = useParams<{ collaboratorId: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [collaborator, setCollaborator] = useState(null);
-  const [canEdit, setCanEdit] = useState(false);
+  const [collaborator, setCollaborator] = useState<any>(null);
+  const [permissionLevel, setPermissionLevel] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [canEdit, setCanEdit] = useState(false);
 
-  interface Collaborator {
-    collaboratorId: number;
-    owner: {
-       accountId: number;
-       accountName: string; 
-    };
-    collaborator: {
-      accountId: number;
-      accountName: string;
-    };
-    grantedBy: {
-      accountId: number;
-      accountName: string;
-    };
-    grantedAt: string;
-    permissionLevel: string;
-  }
-
+  // Load collaborator details + permission check
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Check permission
+        // 1. Check if current user can edit this collaboration
         const permRes = await api.get(
           `/collaborators/${collaboratorId}/can-edit`,
         );
         setCanEdit(permRes.data);
 
-        if (canEdit) {
-          const collabRes = await api.get(`/collaborators/${collaboratorId}`);
-          setCollaborator(collabRes.data);
+        if (!permRes.data) {
+          setError("You do not have permission to edit this collaboration.");
+          setIsLoading(false);
+          return;
         }
+
+        // 2. Fetch the collaborator details
+        const collabRes = await api.get(`/collaborators/${collaboratorId}`);
+        const data = collabRes.data;
+
+        setCollaborator(data);
+        setPermissionLevel(data.permissionLevel || "VIEW_ONLY");
       } catch (err: any) {
         if (err.response?.status === 403) {
           setError("You do not have permission to edit this collaboration.");
         } else {
-          setError("Collaboration not found.");
+          setError("Collaboration not found or could not be loaded.");
         }
       } finally {
         setIsLoading(false);
       }
     };
-    loadData();
+
+    if (collaboratorId) loadData();
   }, [collaboratorId]);
 
-  if (isLoading) return <div className="loading">Loading...</div>;
-  if (error || !canEdit) {
+  const handleSave = async () => {
+    if (!collaborator) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      await api.put(`/collaborators/${collaboratorId}`, {
+        permissionLevel,
+      });
+
+      setSuccessMessage("Collaboration updated successfully!");
+      setTimeout(() => {
+        navigate("/my-collaborators");
+      }, 1500);
+    } catch (err: any) {
+      setError(
+        err.response?.data?.message || "Failed to update collaboration.",
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm("Are you sure you want to remove this collaborator?")) return;
+
+    try {
+      await api.delete(`/collaborators/${collaboratorId}`);
+      setSuccessMessage("Collaborator removed successfully.");
+      setTimeout(() => navigate("/my-collaborators"), 1500);
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Failed to delete collaborator.");
+    }
+  };
+
+  if (isLoading) return <div className="loading">Loading collaboration...</div>;
+
+  if (error) {
     return (
       <div className="page-container">
         <div className="page-card">
           <h1>Access Denied</h1>
-          <p>{error}</p>
+          <p className="server-error">{error}</p>
           <button
             onClick={() => navigate("/my-collaborators")}
             className="primary-button"
           >
-            Back to My Collaborators
+            ← Back to My Collaborators
           </button>
         </div>
       </div>
     );
   }
 
-  const handleSave = async () => {
-
-
   return (
     <div className="page-container">
       <div className="page-card">
         <h1>Edit Collaboration</h1>
-        {error && <div className="server-error">{error}</div>}
+
         {successMessage && <div className="success">{successMessage}</div>}
 
         <div className="form-group">
-          <label htmlFor="permission-select">Collaboration Type:</label>
+          <label>Collaborator:</label>
+          <p>
+            <strong>{collaborator?.collaborator?.accountName}</strong>
+          </p>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="permission-select">Permission Level:</label>
           <select
             id="permission-select"
             value={permissionLevel}
@@ -100,13 +135,24 @@ export default function EditCollaborator() {
             <option value="SCORE_COLLAB_EDIT">Full Collaboration</option>
           </select>
         </div>
-        <button
-          onClick={handleSubmit}
-          disabled={isLoading}
-          className="primary-button"
-        >
-          {isLoading ? "Adding..." : "Add Collaborator"}
-        </button>
+
+        <div style={{ marginTop: "2rem" }}>
+          <button
+            onClick={handleSave}
+            className="primary-button"
+            disabled={isLoading}
+          >
+            {isLoading ? "Saving..." : "💾 Save Changes"}
+          </button>
+
+          <button
+            onClick={handleDelete}
+            className="secondary-button"
+            style={{ marginLeft: "1rem", background: "#ff6b6b" }}
+          >
+            🗑️ Remove Collaborator
+          </button>
+        </div>
       </div>
     </div>
   );
