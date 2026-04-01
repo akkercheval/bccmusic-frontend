@@ -1,17 +1,8 @@
 import axios from 'axios';
 
-const getBaseURL = () => {
-  // For production (when deployed)
-  if (import.meta.env.PROD) {
-    return 'https://api-bccmusic.boonecountyin.org';
-  }
-
-  // For local development
-  return import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-};
-
 const api = axios.create({
-  baseURL: getBaseURL(),
+  baseURL: import.meta.env.VITE_API_BASE_URL || 
+           (import.meta.env.PROD ? 'https://api-bccmusic.boonecountyin.org' : 'http://localhost:8080'),
   headers: {
     'Content-Type': 'application/json',
   },
@@ -19,10 +10,12 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// request interceptor for debugging
-api.interceptors.request.use((config) => {
-  console.log(`[API Request] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
-  return config;
-});
+// Optional: Log requests during development
+if (import.meta.env.DEV) {
+  api.interceptors.request.use((config) => {
+    console.log(`[API] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
+    return config;
+  });
+}
 
 export default api;

@@ -4,4 +4,19 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+
+  // Make environment variables available in the client build
+  define: {
+    'import.meta.env.VITE_API_BASE_URL': JSON.stringify(process.env.VITE_API_BASE_URL),
+  },
+
+  // Optional: Better for production builds
+  build: {
+    sourcemap: false,           // Set to true only during debugging
+    rollupOptions: {
+      output: {
+        manualChunks: undefined, // Keeps bundle size reasonable
+      },
+    },
+  },
 })
