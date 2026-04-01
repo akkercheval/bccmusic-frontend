@@ -16,10 +16,10 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
   timeout: 10000,
-  withCredentials: true,        // Important for cookies/sessions if you use them
+  withCredentials: true,
 });
 
-// Optional: Add a request interceptor for debugging
+// request interceptor for debugging
 api.interceptors.request.use((config) => {
   console.log(`[API Request] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
   return config;
