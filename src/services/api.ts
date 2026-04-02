@@ -1,9 +1,9 @@
+// src/api.ts
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: '',           // ← Relative path – works in both dev and prod
-  // or: baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
-  withCredentials: true,     // if you need cookies / auth
+  baseURL: 'https://api-bccmusic.boonecountyin.org',   // ← This is what you want
+  withCredentials: true,
 });
 
 export default api;
