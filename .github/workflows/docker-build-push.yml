@@ -48,3 +48,24 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      - name: Update GitOps repo with new backend image
+        if: github.ref == 'refs/heads/main' # only on main branch
+        run: |
+          # Clone the gitops repo with write access
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git clone https://x-access-token:${{ secrets.GITOPS_PAT }}@github.com/akkercheval/bccmusic-gitops.git gitops
+          cd gitops
+
+          # Update the image to the exact sha- tag your build already pushes
+          sed -i "s|image: ghcr.io/akkercheval/bccmusic-frontend:.*|image: ghcr.io/akkercheval/bccmusic-frontend:sha-${{ github.sha }}|g" \
+            apps/bccmusic-frontend/deployment.yaml
+
+          # Optional but nice: force a rollout even if the tag somehow matched
+          sed -i "/imagePullPolicy: Always/a \            # Auto-updated by CI on ${{ github.sha }}" \
+            apps/bccmusic-frontend/deployment.yaml
+
+          git add apps/bccmusic-frontend/deployment.yaml
+          git commit -m "chore: update frontend image to sha-${{ github.sha }} (build #${{ github.run_number }})" || echo "No changes"
+          git push origin main
