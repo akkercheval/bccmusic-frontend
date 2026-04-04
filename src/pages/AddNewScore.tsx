@@ -74,6 +74,7 @@ export default function AddNewScore() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showVendorPopup, setShowVendorPopup] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
+  const isOwner = user && user.accountType === "OWNER";
 
   // Score composers managed by ComposerList component
   const [scoreComposers, setScoreComposers] = useState<ComposerEntry[]>([
@@ -234,9 +235,8 @@ export default function AddNewScore() {
     try {
       await api.post("/scores", payload);
       setSuccessMessage("Score added successfully!");
-
-      // Optional: reset form or navigate after success
-      navigate("/scores"); // uncomment if you want to redirect
+      if (isOwner) navigate("/my-scores");
+      else navigate("/all-scores");
     } catch (err: any) {
       console.error("Submit error:", err);
       setServerError(
