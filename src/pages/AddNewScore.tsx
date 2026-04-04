@@ -77,7 +77,7 @@ export default function AddNewScore() {
     if (loading || !user) return;
 
     api
-      .get("/collaborators/my-collaborations")
+      .get("/collaborators")
       .then((res) => {
         const collaborations: CollaborationAccount[] = res.data;
         const validCollaborations = collaborations.filter(
