@@ -9,8 +9,6 @@ import type { ComposerEntry } from "../components/ComposerList";
 import "./AddNewScore.css";
 import TagsList from "../components/TagsList";
 import MedleyList from "../components/MedleyList";
-import type { Account } from "../types/Account";
-import type { CollaborationAccount } from "../types/CollaborationAccount";
 import AddEditVendorPopup from "../components/AddEditVendorPopup";
 
 interface Vendor {
@@ -18,30 +16,34 @@ interface Vendor {
   vendorName: string;
 }
 
+interface CollaborationInfo {
+  ownerAccountId: number;
+  ownerAccountName: string;
+  permissionLevel: string;
+}
+
 export default function AddNewScore() {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
+  // Form state
   const [formData, setFormData] = useState({
     scoreTitle: "",
     scoreSubtitle: "",
     owner: "",
     purchasedFrom: "",
-    purchasedDate: null,
-    purchasedCost: null,
-    grade: null,
+    purchasedDate: null as string | null,
+    purchasedCost: null as string | null,
+    grade: null as string | null,
     arrangementType: "",
-    scoreComposers: "",
-    parts: "",
-    scoreTags: "",
-    medleys: "",
   });
 
+  // Complex data states
   const [parts, setParts] = useState<Part[]>([]);
   const [scoreTags, setScoreTags] = useState<
     { scoreTagId?: number; scoreId?: number; tag: string }[]
   >([]);
-  const [allowedOwners, setAllowedOwners] = useState<Account[]>([]);
+  const [allowedOwners, setAllowedOwners] = useState<CollaborationInfo[]>([]);
   const [arrangementTypes, setArrangementTypes] = useState<
     { code: string; name: string }[]
   >([]);
@@ -62,91 +64,95 @@ export default function AddNewScore() {
       composerId?: number;
     }[]
   >([]);
+  const [existingVendors, setExistingVendors] = useState<Vendor[]>([]);
+
+  // UI states
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showVendorPopup, setShowVendorPopup] = useState(false);
+  const [loadingData, setLoadingData] = useState(true);
+
+  // Score composers managed by ComposerList component
   const [scoreComposers, setScoreComposers] = useState<ComposerEntry[]>([
     { contributionType: "" },
   ]);
-  const [existingVendors, setExistingVendors] = useState<Vendor[]>([]);
-  const [showVendorPopup, setShowVendorPopup] = useState(false);
 
+  // Fetch all initial data safely
   useEffect(() => {
-    if (loading || !user) return;
+    if (authLoading || !user) return;
 
-    api
-      .get("/collaborators")
-      .then((res) => {
-        const collaborations: CollaborationAccount[] = res.data;
-        const validCollaborations = collaborations.filter(
-          (collab) =>
-            collab.ownerAccountId === user.accountId ||
-            collab.collaboratorAccountId === user.accountId,
+    const fetchInitialData = async () => {
+      setLoadingData(true);
+      setServerError(null);
+
+      try {
+        const [ownersRes, composersRes, arrangementRes, vendorsRes, tagsRes] =
+          await Promise.all([
+            api.get("/collaborators/myAllowedOwners"),
+            api.get("/composers"),
+            api.get("/arrangement-types"),
+            api.get("/vendors"),
+            api.get("/score-tags"),
+          ]);
+
+        // Safe array handling for all responses
+        setAllowedOwners(Array.isArray(ownersRes.data) ? ownersRes.data : []);
+        setExistingComposers(
+          Array.isArray(composersRes.data) ? composersRes.data : [],
         );
-        const ownerAccounts = validCollaborations.map((collab) => ({
-          accountId: collab.ownerAccountId,
-          accountName: collab.ownerAccountName,
-        }));
-        setAllowedOwners(ownerAccounts);
+        setArrangementTypes(
+          Array.isArray(arrangementRes.data) ? arrangementRes.data : [],
+        );
+        setExistingVendors(
+          Array.isArray(vendorsRes.data) ? vendorsRes.data : [],
+        );
 
-        if (ownerAccounts.length > 0) {
-          setFormData((prev) => ({
-            ...prev,
-            owner: ownerAccounts[0].accountId.toString(),
-          }));
-        }
-      })
-      .catch((err) => {
-        console.error("Failed to fetch collaborations", err);
-        setServerError("Failed to load owner options. Please try again.");
-      });
+        setExistingTags(
+          Array.isArray(tagsRes.data)
+            ? tagsRes.data.map((t: { tag: string }) => t.tag)
+            : [],
+        );
+      } catch (err: any) {
+        console.error("Failed to load initial data:", err);
+        setServerError(
+          "Failed to load some required data. Please try refreshing the page.",
+        );
 
-    api
-      .get("/composers")
-      .then((res) => setExistingComposers(res.data))
-      .catch((err) => console.error("Failed to fetch composers", err));
+        // Safe fallbacks
+        setAllowedOwners([]);
+        setExistingComposers([]);
+        setArrangementTypes([]);
+        setExistingVendors([]);
+        setExistingTags([]);
+      } finally {
+        setLoadingData(false);
+      }
+    };
 
-    api.get("/arrangement-types").then((res) => {
-      setArrangementTypes(res.data);
-    });
-    api
-      .get("/vendors")
-      .then((res) => setExistingVendors(res.data))
-      .catch((err) => console.error("Failed to fetch vendors", err));
-    api
-      .get("/score-tags")
-      .then((res) =>
-        setExistingTags(res.data.map((t: { tag: string }) => t.tag)),
-      )
-      .catch((err) => console.error("Failed to fetch score tags", err));
-  }, [loading, user]);
+    fetchInitialData();
+  }, [authLoading, user]);
 
-  if (loading) return <div>Loading...</div>;
+  // Redirect if not authenticated
+  if (authLoading) return <div>Loading...</div>;
   if (!user) {
     navigate("/login");
     return null;
   }
 
-  const validateField = (name: string, value: string) => {
-    let error = "";
-
+  const validateField = (name: string, value: string): string => {
     switch (name) {
       case "scoreTitle":
-        if (!value.trim()) error = "Score title is required";
-        break;
+        return !value.trim() ? "Score title is required" : "";
       case "arrangementType":
-        if (!value.trim()) error = "Arrangement type is required";
-        break;
+        return !value.trim() ? "Arrangement type is required" : "";
       case "owner":
-        if (!value) error = "Please select an owner";
-        break;
+        return !value ? "Please select an owner" : "";
       default:
-        break;
+        return "";
     }
-
-    return error;
   };
 
   const handleChange = (
@@ -177,17 +183,17 @@ export default function AddNewScore() {
     setSuccessMessage(null);
     setIsLoading(true);
 
-    // Validate required fields
+    // Final validation
     const newErrors: Record<string, string> = {};
     if (!formData.scoreTitle.trim())
       newErrors.scoreTitle = "Score title is required";
     if (!formData.arrangementType)
-      newErrors.arrangementTypeCode = "Arrangement type is required";
+      newErrors.arrangementType = "Arrangement type is required";
     if (!formData.owner) newErrors.owner = "Please select an owner";
 
     setErrors(newErrors);
+
     if (Object.keys(newErrors).length > 0) {
-      console.log("Validation errors:", newErrors); // Debug
       setServerError("Please fix the errors above.");
       setIsLoading(false);
       return;
@@ -198,14 +204,14 @@ export default function AddNewScore() {
       scoreSubtitle: formData.scoreSubtitle?.trim() || null,
       owner: { accountId: parseInt(formData.owner) },
       purchasedFrom: formData.purchasedFrom
-        ? { vendorId: parseInt(formData.purchasedFrom) } // ← now sends ID (matches backend)
+        ? { vendorId: parseInt(formData.purchasedFrom) }
         : null,
       purchasedDate: formData.purchasedDate || null,
       purchasedCost: formData.purchasedCost
         ? parseFloat(formData.purchasedCost)
         : null,
       grade: formData.grade ? parseFloat(formData.grade) : null,
-      arrangementType: { code: formData.arrangementType }, // Key change: send object
+      arrangementType: { code: formData.arrangementType },
       scoreComposers: scoreComposers.map((c) => ({
         composer: { composerId: c.composerId },
         contributionType: c.contributionType.trim(),
@@ -225,11 +231,12 @@ export default function AddNewScore() {
       })),
     };
 
-    console.log("Submitting payload:", payload); // Debug to verify structure
-
     try {
       await api.post("/scores", payload);
       setSuccessMessage("Score added successfully!");
+
+      // Optional: reset form or navigate after success
+      navigate("/scores"); // uncomment if you want to redirect
     } catch (err: any) {
       console.error("Submit error:", err);
       setServerError(
@@ -294,17 +301,19 @@ export default function AddNewScore() {
             onChange={handleChange}
             onBlur={handleBlur}
             required
+            disabled={loadingData}
           >
             <option value="">Select owner...</option>
             {allowedOwners.map((o) => (
-              <option key={o.accountId} value={o.accountId}>
-                {o.accountName}
+              <option key={o.ownerAccountId} value={o.ownerAccountId}>
+                {o.ownerAccountName}
               </option>
             ))}
           </select>
           {touched.owner && errors.owner && (
             <span className="error">{errors.owner}</span>
           )}
+          {loadingData && <small>Loading available owners...</small>}
         </div>
 
         <div className="form-group">
@@ -382,6 +391,7 @@ export default function AddNewScore() {
             value={formData.arrangementType}
             onChange={handleChange}
             required
+            disabled={loadingData}
           >
             <option value="">Select type...</option>
             {arrangementTypes.map((t) => (
@@ -415,10 +425,15 @@ export default function AddNewScore() {
           setExistingComposers={setExistingComposers}
         />
 
-        <button type="button" onClick={handleSubmit} disabled={isLoading}>
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={isLoading || loadingData}
+        >
           {isLoading ? "Adding Score..." : "Add Score"}
         </button>
       </form>
+
       <AddEditVendorPopup
         open={showVendorPopup}
         onClose={() => setShowVendorPopup(false)}
