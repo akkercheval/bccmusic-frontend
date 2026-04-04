@@ -110,12 +110,7 @@ export default function AddNewScore() {
         setExistingVendors(
           Array.isArray(vendorsRes.data) ? vendorsRes.data : [],
         );
-
-        setExistingTags(
-          Array.isArray(tagsRes.data)
-            ? tagsRes.data.map((t: { tag: string }) => t.tag)
-            : [],
-        );
+        setExistingTags(Array.isArray(tagsRes.data) ? tagsRes.data : []);
       } catch (err: any) {
         console.error("Failed to load initial data:", err);
         setServerError(
@@ -429,8 +424,9 @@ export default function AddNewScore() {
           type="button"
           onClick={handleSubmit}
           disabled={isLoading || loadingData}
+          className="primary-button"
         >
-          {isLoading ? "Adding Score..." : "Add Score"}
+          {isLoading ? "Adding Score..." : "Save Score"}
         </button>
       </form>
 
