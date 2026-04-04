@@ -7,13 +7,12 @@ export default function Home() {
       <div className="welcome-text">
         <h1>Welcome!</h1>
         <p>
-          BCC Music exists to catalog music for easy searching. Anyone can
-          create a new account, which will be set up as a Viewer by default.
+          BCCMusic exists to catalog music for easy searching. Anyone can create
+          a new account, which will be set up as a Viewer by default.
         </p>
         <p>
           Viewers will be able to search both the public music catalog and any
-          private collections to which they have been granted access. Viewers
-          can also search the current list of Vendors.
+          private collections to which they have been granted access.
         </p>
         <p>
           An Owner account will be able to add new music to their collection and
@@ -23,6 +22,11 @@ export default function Home() {
           A Collaborator account will be able to update music for an Owner
           account. This may be either limited edit, full edit, or full edit with
           the ability to add new Collaborators.
+        </p>
+        <p>
+          To get started, please create an account or log in if you already have
+          one. If you would like to create an account with Owner permissions,
+          please contact the site administrator.
         </p>
       </div>
       <div
