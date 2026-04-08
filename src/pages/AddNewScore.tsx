@@ -6,10 +6,10 @@ import ComposerList from "../components/ComposerList";
 import PartList from "../components/PartList";
 import type { Part } from "../components/PartList";
 import type { ComposerEntry } from "../components/ComposerList";
-import "./AddNewScore.css";
 import TagsList from "../components/TagsList";
 import MedleyList from "../components/MedleyList";
 import AddEditVendorPopup from "../components/AddEditVendorPopup";
+import "./AddNewScore.css";
 
 interface Vendor {
   vendorId: number;

@@ -2,14 +2,12 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
-import "./ViewEditScore.css";
-
 import ComposerList from "../components/ComposerList";
 import PartList from "../components/PartList";
 import TagsList from "../components/TagsList";
 import MedleyList from "../components/MedleyList";
-
 import type { Part } from "../components/PartList";
+import "./ViewEditScore.css";
 
 type TagEntry = { scoreTagId?: number; tag: string };
 
@@ -104,6 +102,9 @@ export default function ViewEditScore() {
   const [arrangementTypes, setArrangementTypes] = useState<
     { code: string; name: string }[]
   >([]);
+  const [vendors, setVendors] = useState<
+    { vendorId: number; vendorName: string }[]
+  >([]);
 
   const canEdit = user && score && user.accountId === score.owner.accountId;
 
@@ -125,13 +126,19 @@ export default function ViewEditScore() {
   useEffect(() => {
     const loadAll = async () => {
       try {
-        const [scoreRes, composersRes, arrRes, existingTagsRes] =
+        const [scoreRes, composersRes, arrRes, vendorsRes, tagsRes] =
           await Promise.all([
             api.get(`/scores/${scoreId}`),
             api.get("/composers"),
             api.get("/arrangement-types"),
+            api.get("/vendors"),
             api.get("/score-tags"),
           ]);
+
+        setExistingComposers(composersRes.data);
+        setExistingTags(tagsRes.data); // ← now correct
+        setArrangementTypes(arrRes.data);
+        setVendors(vendorsRes.data);
 
         const data = scoreRes.data;
         const normalizedComposers = (data.scoreComposers || []).map(
@@ -144,24 +151,11 @@ export default function ViewEditScore() {
             fullName: sc.composer?.fullName,
           }),
         );
-
-        const normalizedMedleys = (data.medleys || []).map((m: any) => ({
-          ...m,
-          composerId: m.composer?.composerId,
-          firstName: m.composer?.firstName,
-          middleName: m.composer?.middleName,
-          lastName: m.composer?.lastName,
-          fullName: m.composer?.fullName,
-        }));
-
         setScore(data);
         setScoreComposers(normalizedComposers);
         setParts(data.parts || []);
         setScoreTags(data.scoreTags || []);
-        setMedleys(normalizedMedleys);
-        setExistingComposers(composersRes.data);
-        setExistingTags(existingTagsRes.data);
-        setArrangementTypes(arrRes.data);
+        setMedleys(data.medleys || []);
       } catch (err: any) {
         setError(err.response?.data?.message || "Score not found");
       } finally {
@@ -192,18 +186,22 @@ export default function ViewEditScore() {
       parts: parts,
       scoreTags: scoreTags,
       medleys: medleys.map((m) => {
+        // Prefer nested composerId, fallback to flat (in case MedleyList still uses it)
+        const composerId = m.composer?.composerId;
+
         const composerInfo = existingComposers.find(
-          (c) => c.composerId === m.composer.composerId,
+          (c) => c.composerId === composerId,
         );
 
-        const displayName =
-          [
-            composerInfo?.firstName,
-            composerInfo?.middleName,
-            composerInfo?.lastName,
-          ]
-            .filter(Boolean)
-            .join(" ") || `Composer #${m.composer.composerId || "unknown"}`;
+        const displayName = composerInfo
+          ? [
+              composerInfo.firstName,
+              composerInfo.middleName,
+              composerInfo.lastName,
+            ]
+              .filter(Boolean)
+              .join(" ") || `Composer #${composerInfo.composerId}`
+          : `Composer #${composerId || "unknown"}`;
 
         return {
           pieceTitle: m.pieceTitle,
@@ -217,9 +215,9 @@ export default function ViewEditScore() {
                 fullName: displayName,
               }
             : {
-                composerId: m.composer.composerId,
+                composerId: composerId || null, // explicit null so backend error is clearer
                 lastName: "Unknown Composer",
-              }, // fallback (should never hit after a successful select)
+              },
         };
       }),
     };
@@ -230,6 +228,7 @@ export default function ViewEditScore() {
     console.log("Medleys payload:", medleys);
 
     try {
+      console.log("Medleys being saved:", JSON.stringify(medleys, null, 2));
       await api.put(`/scores/${scoreId}`, payload);
       alert("✅ Score saved successfully!");
       setIsEditing(false);
