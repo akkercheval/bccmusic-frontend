@@ -50,7 +50,7 @@ export interface Part {
 export interface ScoreComposer {
   scoreComposerId?: number;
   scoreId?: number;
-  composer: Composer;           // full nested on response
+  composer: Composer;           
   contributionType: string;     // "COMPOSER" | "ARRANGER" | "LYRICIST" | "OTHER"
 }
 
@@ -79,7 +79,8 @@ export interface MedleyEntry extends Omit<Medley, 'composer'> {
 }
 
 export interface ComposerEntry {
-  composerId?: number;
+  scoreComposerId?: number;
+  composerId?: number | null;
   firstName?: string;
   middleName?: string;
   lastName?: string;

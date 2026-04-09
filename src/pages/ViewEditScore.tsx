@@ -15,7 +15,7 @@ import type {
   Part,
   ScoreTag,
   Vendor,
-  ComposerEntry, // ← Added
+  ComposerEntry,
 } from "../types/score";
 
 import "./ViewEditScore.css";
@@ -90,6 +90,7 @@ export default function ViewEditScore() {
         const normalizedComposers: ComposerEntry[] = (
           data.scoreComposers || []
         ).map((sc: any) => ({
+          scoreComposerId: sc.scoreComposerId,
           composerId: sc.composer?.composerId,
           firstName: sc.composer?.firstName,
           middleName: sc.composer?.middleName,
@@ -127,8 +128,14 @@ export default function ViewEditScore() {
       grade: score.grade || null,
       arrangementType: score.arrangementType,
       scoreComposers: scoreComposers.map((c) => ({
-        scoreComposerId: null, // will be handled by backend for existing ones
-        composer: { composerId: c.composerId! },
+        scoreComposerId: c.scoreComposerId ?? null,
+        composer: {
+          composerId: c.composerId!,
+          firstName: c.firstName,
+          middleName: c.middleName,
+          lastName: c.lastName,
+          fullName: c.fullName,
+        },
         contributionType: c.contributionType,
       })),
       parts,
