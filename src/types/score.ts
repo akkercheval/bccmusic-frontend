@@ -1,3 +1,4 @@
+import type { Account } from "./Account";
 
 // Basic reusable primitives
 export interface Composer {

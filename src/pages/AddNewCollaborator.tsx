@@ -3,7 +3,11 @@ import { useAuth } from "../context/AuthContext";
 import React, { useState, useEffect } from "react";
 import api from "../services/api";
 import "./AddNewCollaborator.css";
-import type { Account } from "../types/account";
+
+interface Account {
+  accountId: number;
+  accountName: string;
+}
 
 export default function AddNewCollaborator() {
   const navigate = useNavigate();

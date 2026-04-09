@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import type { Dispatch, SetStateAction } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
