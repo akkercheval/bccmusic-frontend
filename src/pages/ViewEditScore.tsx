@@ -13,9 +13,9 @@ import type {
   MusicScore,
   MedleyEntry,
   Part,
-  ScoreComposer,
   ScoreTag,
   Vendor,
+  ComposerEntry, // ← Added
 } from "../types/score";
 
 import "./ViewEditScore.css";
@@ -34,13 +34,13 @@ export default function ViewEditScore() {
   const [error, setError] = useState<string | null>(null);
   const [showVendorPopup, setShowVendorPopup] = useState(false);
 
-  // Edit state (separate from main score for clarity)
-  const [scoreComposers, setScoreComposers] = useState<ScoreComposer[]>([]);
+  // Editing states - using flat shapes that the list components expect
+  const [scoreComposers, setScoreComposers] = useState<ComposerEntry[]>([]);
   const [parts, setParts] = useState<Part[]>([]);
   const [scoreTags, setScoreTags] = useState<ScoreTag[]>([]);
   const [medleys, setMedleys] = useState<MedleyEntry[]>([]);
 
-  // Lookup data
+  // Lookup / reference data
   const [existingComposers, setExistingComposers] = useState<
     {
       composerId: number;
@@ -59,13 +59,9 @@ export default function ViewEditScore() {
 
   const handleGoBack = () => {
     if (backInfo) {
-      if (backInfo === "all-scores") {
-        navigate("/all-scores");
-      } else if (backInfo === "my-scores") {
-        navigate("/my-scores");
-      } else {
-        navigate(-1);
-      }
+      if (backInfo === "all-scores") navigate("/all-scores");
+      else if (backInfo === "my-scores") navigate("/my-scores");
+      else navigate(-1);
     } else {
       navigate(-1);
     }
@@ -90,23 +86,23 @@ export default function ViewEditScore() {
 
         const data: MusicScore = scoreRes.data;
 
-        // Normalize composers for editing (flat structure expected by ComposerList)
-        const normalizedComposers: ScoreComposer[] = (
+        // Normalize for editing: convert nested composer → flat ComposerEntry
+        const normalizedComposers: ComposerEntry[] = (
           data.scoreComposers || []
         ).map((sc: any) => ({
-          ...sc,
           composerId: sc.composer?.composerId,
           firstName: sc.composer?.firstName,
           middleName: sc.composer?.middleName,
           lastName: sc.composer?.lastName,
           fullName: sc.composer?.fullName,
+          contributionType: sc.contributionType,
         }));
 
         setScore(data);
         setScoreComposers(normalizedComposers);
         setParts(data.parts || []);
         setScoreTags(data.scoreTags || []);
-        setMedleys(data.medleys || []); // Note: backend returns nested composer, but MedleyEntry is flat
+        setMedleys(data.medleys || []);
       } catch (err: any) {
         setError(err.response?.data?.message || "Score not found");
       } finally {
@@ -131,15 +127,14 @@ export default function ViewEditScore() {
       grade: score.grade || null,
       arrangementType: score.arrangementType,
       scoreComposers: scoreComposers.map((c) => ({
-        scoreComposerId: c.scoreComposerId ?? null,
-        composer: { composerId: c.composer?.composerId },
+        scoreComposerId: null, // will be handled by backend for existing ones
+        composer: { composerId: c.composerId! },
         contributionType: c.contributionType,
       })),
       parts,
       scoreTags,
       medleys: medleys.map((m) => {
         const composerId = m.composerId ?? null;
-
         const composerInfo = existingComposers.find(
           (c) => c.composerId === composerId,
         );
@@ -166,15 +161,11 @@ export default function ViewEditScore() {
                 lastName: composerInfo.lastName,
                 fullName: displayName,
               }
-            : {
-                composerId,
-                lastName: "Unknown Composer",
-              },
+            : { composerId, lastName: "Unknown Composer" },
         };
       }),
     };
 
-    // Guard against invalid medleys
     const hasInvalidMedley = medleys.some(
       (m) => !m.composerId || m.composerId <= 0,
     );
@@ -187,7 +178,7 @@ export default function ViewEditScore() {
       await api.put(`/scores/${scoreId}`, payload);
       alert("✅ Score saved successfully!");
       setIsEditing(false);
-      window.location.reload(); // Refresh to get fresh data with audit fields
+      window.location.reload();
     } catch (err: any) {
       alert(err.response?.data?.message || "Failed to save changes.");
     }
@@ -248,9 +239,7 @@ export default function ViewEditScore() {
                 {score.scoreComposers.map((c, i) => {
                   const name =
                     c.composer.fullName ||
-                    `${c.composer.firstName || ""} ${c.composer.middleName || ""} ${
-                      c.composer.lastName || ""
-                    }`.trim() ||
+                    `${c.composer.firstName || ""} ${c.composer.middleName || ""} ${c.composer.lastName || ""}`.trim() ||
                     `Composer #${c.composer.composerId}`;
 
                   const contributionDisplay =
@@ -382,7 +371,6 @@ export default function ViewEditScore() {
             >
               {isEditing ? "🚫 Cancel Edit" : "✏️ Edit Score"}
             </button>
-
             {isEditing && (
               <>
                 <button onClick={handleSave} className="primary-button">
@@ -436,8 +424,6 @@ export default function ViewEditScore() {
                 }
               />
             </div>
-
-            {/* Purchased From, Grade, Arrangement Type, Dates, Cost — unchanged but cleaned */}
 
             <div className="form-group">
               <label htmlFor="purchasedFrom">Purchased From</label>
