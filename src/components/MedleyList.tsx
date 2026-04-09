@@ -56,9 +56,6 @@ export default function MedleyList({
     field: keyof MedleyEntry,
     value: string | number | undefined,
   ) => {
-    console.log(
-      `Updating medley at index ${index}: setting ${field} to ${value}`,
-    );
     const updatedMedleys = [...medleys];
     updatedMedleys[index] = { ...updatedMedleys[index], [field]: value };
     setMedleys(updatedMedleys);

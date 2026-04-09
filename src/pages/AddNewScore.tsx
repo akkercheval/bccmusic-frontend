@@ -31,7 +31,7 @@ export default function AddNewScore() {
     scoreTitle: "",
     scoreSubtitle: "",
     owner: "",
-    purchasedFrom: "",
+    purchasedFrom: null as Vendor | null,
     purchasedDate: null as string | null,
     purchasedCost: null as string | null,
     grade: null as string | null,
@@ -199,9 +199,7 @@ export default function AddNewScore() {
       scoreTitle: formData.scoreTitle.trim(),
       scoreSubtitle: formData.scoreSubtitle?.trim() || null,
       owner: { accountId: parseInt(formData.owner) },
-      purchasedFrom: formData.purchasedFrom
-        ? { vendorId: parseInt(formData.purchasedFrom) }
-        : null,
+      purchasedFrom: formData.purchasedFrom ? formData.purchasedFrom : null,
       purchasedDate: formData.purchasedDate || null,
       purchasedCost: formData.purchasedCost
         ? parseFloat(formData.purchasedCost)
@@ -246,7 +244,7 @@ export default function AddNewScore() {
     setExistingVendors((prev) => [...prev, newVendor]);
     setFormData((prev) => ({
       ...prev,
-      purchasedFrom: newVendor.vendorId.toString(),
+      purchasedFrom: newVendor,
     }));
     setShowVendorPopup(false);
   };
@@ -316,21 +314,24 @@ export default function AddNewScore() {
           <select
             id="purchasedFrom"
             name="purchasedFrom"
-            value={formData.purchasedFrom}
+            value={formData.purchasedFrom?.vendorName || ""}
             onChange={(e) => {
               if (e.target.value === "new") {
                 setShowVendorPopup(true);
               } else {
+                const selectedVendor = existingVendors.find(
+                  (v) => v.vendorName === e.target.value,
+                );
                 setFormData((prev) => ({
                   ...prev,
-                  purchasedFrom: e.target.value,
+                  purchasedFrom: selectedVendor || null,
                 }));
               }
             }}
           >
             <option value="">— Select or create vendor —</option>
             {existingVendors.map((v) => (
-              <option key={v.vendorId} value={v.vendorId}>
+              <option key={v.vendorId} value={v.vendorName}>
                 {v.vendorName}
               </option>
             ))}

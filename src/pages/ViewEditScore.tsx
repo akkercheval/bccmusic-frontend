@@ -5,9 +5,15 @@ import api from "../services/api";
 import ComposerList from "../components/ComposerList";
 import PartList from "../components/PartList";
 import TagsList from "../components/TagsList";
-import MedleyList from "../components/MedleyList";
+import MedleyList, { type MedleyEntry } from "../components/MedleyList";
 import type { Part } from "../components/PartList";
+import AddEditVendorPopup from "../components/AddEditVendorPopup";
 import "./ViewEditScore.css";
+
+interface Vendor {
+  vendorId: number;
+  vendorName: string;
+}
 
 type TagEntry = { scoreTagId?: number; tag: string };
 
@@ -16,7 +22,7 @@ interface MusicScore {
   scoreTitle: string;
   scoreSubtitle?: string;
   owner: { accountId: number; accountName: string };
-  purchasedFrom?: { vendorId?: number; vendorName?: string };
+  purchasedFrom?: Vendor;
   purchasedDate?: string;
   purchasedCost?: number;
   grade?: number;
@@ -36,7 +42,7 @@ interface MusicScore {
   parts: Part[];
   scoreTags: TagEntry[];
   medleys: {
-    medleyId: number;
+    medleyId?: number;
     pieceTitle: string;
     composer: {
       composerId: number;
@@ -60,7 +66,7 @@ export default function ViewEditScore() {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  const [showVendorPopup, setShowVendorPopup] = useState(false);
   const [scoreComposers, setScoreComposers] = useState<
     {
       scoreComposerId: number;
@@ -77,19 +83,7 @@ export default function ViewEditScore() {
   >([]);
   const [parts, setParts] = useState<Part[]>([]);
   const [scoreTags, setScoreTags] = useState<TagEntry[]>([]);
-  const [medleys, setMedleys] = useState<
-    {
-      medleyId: number;
-      pieceTitle: string;
-      composer: {
-        composerId: number;
-        firstName?: string;
-        middleName?: string;
-        lastName: string;
-        fullName: string;
-      };
-    }[]
-  >([]);
+  const [medleys, setMedleys] = useState<MedleyEntry[]>([]);
   const [existingComposers, setExistingComposers] = useState<
     {
       composerId: number;
@@ -102,9 +96,7 @@ export default function ViewEditScore() {
   const [arrangementTypes, setArrangementTypes] = useState<
     { code: string; name: string }[]
   >([]);
-  const [vendors, setVendors] = useState<
-    { vendorId: number; vendorName: string }[]
-  >([]);
+  const [existingVendors, setExistingVendors] = useState<Vendor[]>([]);
 
   const canEdit = user && score && user.accountId === score.owner.accountId;
 
@@ -136,9 +128,9 @@ export default function ViewEditScore() {
           ]);
 
         setExistingComposers(composersRes.data);
-        setExistingTags(tagsRes.data); // ← now correct
+        setExistingTags(tagsRes.data);
         setArrangementTypes(arrRes.data);
-        setVendors(vendorsRes.data);
+        setExistingVendors(vendorsRes.data);
 
         const data = scoreRes.data;
         const normalizedComposers = (data.scoreComposers || []).map(
@@ -186,8 +178,7 @@ export default function ViewEditScore() {
       parts: parts,
       scoreTags: scoreTags,
       medleys: medleys.map((m) => {
-        // Prefer nested composerId, fallback to flat (in case MedleyList still uses it)
-        const composerId = m.composer?.composerId;
+        const composerId = m.composerId ?? null; // flat only now
 
         const composerInfo = existingComposers.find(
           (c) => c.composerId === composerId,
@@ -204,8 +195,9 @@ export default function ViewEditScore() {
           : `Composer #${composerId || "unknown"}`;
 
         return {
+          scoreId: score.scoreId,
           pieceTitle: m.pieceTitle,
-          medleyId: m.medleyId,
+          medleyId: m.medleyId, // undefined for new = fine
           composer: composerInfo
             ? {
                 composerId: composerInfo.composerId,
@@ -215,12 +207,23 @@ export default function ViewEditScore() {
                 fullName: displayName,
               }
             : {
-                composerId: composerId || null, // explicit null so backend error is clearer
+                composerId: composerId,
                 lastName: "Unknown Composer",
               },
         };
       }),
     };
+
+    const hasInvalidMedley = medleys.some((m) => {
+      const cid =
+        (m as { composerId?: number }).composerId ??
+        (m as { composer?: { composerId?: number } }).composer?.composerId;
+      return !cid || cid <= 0;
+    });
+    if (hasInvalidMedley) {
+      alert("Please select a composer for every medley piece.");
+      return;
+    }
 
     console.log("Saving score with payload:", payload);
     console.log("Parts payload:", parts);
@@ -247,6 +250,12 @@ export default function ViewEditScore() {
     } catch (err) {
       alert("Failed to delete");
     }
+  };
+
+  const handleNewVendorSuccess = (newVendor: Vendor) => {
+    setExistingVendors((prev) => [...prev, newVendor]);
+    setScore((prev) => (prev ? { ...prev, purchasedFrom: newVendor } : prev));
+    setShowVendorPopup(false);
   };
 
   if (isLoading) return <div className="loading">Loading score...</div>;
@@ -425,7 +434,9 @@ export default function ViewEditScore() {
                 name="scoreTitle"
                 value={score.scoreTitle}
                 onChange={(e) =>
-                  setScore({ ...score, scoreTitle: e.target.value })
+                  setScore((prev) =>
+                    prev ? { ...prev, scoreTitle: e.target.value } : prev,
+                  )
                 }
                 required
               />
@@ -438,9 +449,44 @@ export default function ViewEditScore() {
                 name="scoreSubtitle"
                 value={score.scoreSubtitle || ""}
                 onChange={(e) =>
-                  setScore({ ...score, scoreSubtitle: e.target.value })
+                  setScore((prev) =>
+                    prev ? { ...prev, scoreSubtitle: e.target.value } : prev,
+                  )
                 }
               />
+            </div>
+            <div className="form-group">
+              <label htmlFor="purchasedFrom">Purchased From</label>
+              <select
+                id="purchasedFrom"
+                name="purchasedFrom"
+                value={score.purchasedFrom?.vendorName || ""}
+                onChange={(e) => {
+                  if (e.target.value === "new") {
+                    setShowVendorPopup(true);
+                  } else {
+                    const selectedVendor = existingVendors.find(
+                      (v) => v.vendorName === e.target.value,
+                    );
+                    setScore((prev) =>
+                      prev
+                        ? {
+                            ...prev,
+                            purchasedFrom: selectedVendor || undefined,
+                          }
+                        : prev,
+                    );
+                  }
+                }}
+              >
+                <option value="">— Select or create vendor —</option>
+                {existingVendors.map((v) => (
+                  <option key={v.vendorId} value={v.vendorName}>
+                    {v.vendorName}
+                  </option>
+                ))}
+                <option value="new">+ Create new vendor</option>
+              </select>
             </div>
             <div className="form-group">
               <label htmlFor="grade">Grade</label>
@@ -450,10 +496,14 @@ export default function ViewEditScore() {
                 id="grade"
                 value={score.grade || ""}
                 onChange={(e) =>
-                  setScore({
-                    ...score,
-                    grade: parseFloat(e.target.value) || undefined,
-                  })
+                  setScore((prev) =>
+                    prev
+                      ? {
+                          ...prev,
+                          grade: parseFloat(e.target.value) || undefined,
+                        }
+                      : prev,
+                  )
                 }
               />
             </div>
@@ -463,10 +513,11 @@ export default function ViewEditScore() {
                 id="arrangementType"
                 value={score.arrangementType.code}
                 onChange={(e) =>
-                  setScore({
-                    ...score,
-                    arrangementType: { code: e.target.value },
-                  })
+                  setScore((prev) =>
+                    prev
+                      ? { ...prev, arrangementType: { code: e.target.value } }
+                      : prev,
+                  )
                 }
               >
                 {arrangementTypes.map((t) => (
@@ -483,7 +534,9 @@ export default function ViewEditScore() {
                 id="purchasedDate"
                 value={score.purchasedDate || ""}
                 onChange={(e) =>
-                  setScore({ ...score, purchasedDate: e.target.value })
+                  setScore((prev) =>
+                    prev ? { ...prev, purchasedDate: e.target.value } : prev,
+                  )
                 }
               />
             </div>
@@ -495,22 +548,22 @@ export default function ViewEditScore() {
                 id="purchasedCost"
                 value={score.purchasedCost || ""}
                 onChange={(e) =>
-                  setScore({
-                    ...score,
-                    purchasedCost: parseFloat(e.target.value) || undefined,
-                  })
+                  setScore((prev) =>
+                    prev
+                      ? {
+                          ...prev,
+                          purchasedCost:
+                            parseFloat(e.target.value) || undefined,
+                        }
+                      : prev,
+                  )
                 }
               />
-            </div>{" "}
+            </div>
+
             <ComposerList
               composers={scoreComposers}
-              setComposers={setScoreComposers as any}
-              existingComposers={existingComposers}
-              setExistingComposers={setExistingComposers}
-            />
-            <MedleyList
-              medleys={medleys}
-              setMedleys={setMedleys as any}
+              setComposers={setScoreComposers}
               existingComposers={existingComposers}
               setExistingComposers={setExistingComposers}
             />
@@ -521,9 +574,20 @@ export default function ViewEditScore() {
               existingTags={existingTags}
               setExistingTags={setExistingTags}
             />
+            <MedleyList
+              medleys={medleys}
+              setMedleys={setMedleys}
+              existingComposers={existingComposers}
+              setExistingComposers={setExistingComposers}
+            />
           </form>
         )}
       </div>
+      <AddEditVendorPopup
+        open={showVendorPopup}
+        onClose={() => setShowVendorPopup(false)}
+        onSuccess={handleNewVendorSuccess}
+      />
     </div>
   );
 }
