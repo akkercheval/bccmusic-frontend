@@ -1,15 +1,7 @@
 import React, { useState } from "react";
-import "./ComposerList.css";
 import AddNewComposerPopup from "./AddEditComposerPopup";
-
-export interface ComposerEntry {
-  composerId?: number;
-  firstName?: string;
-  middleName?: string;
-  lastName?: string;
-  fullName?: string;
-  contributionType: string;
-}
+import type { ComposerEntry } from "../types/score";
+import "./ComposerList.css";
 
 export interface ComposerListProps {
   composers: ComposerEntry[];

@@ -1,17 +1,7 @@
 import React, { useState } from "react";
-import "./MedleyList.css";
 import AddNewComposerPopup from "./AddEditComposerPopup";
-
-export interface MedleyEntry {
-  medleyId?: number;
-  scoreId?: number;
-  pieceTitle: string;
-  composerId?: number;
-  firstName?: string;
-  middleName?: string;
-  lastName?: string;
-  fullName?: string;
-}
+import type { MedleyEntry } from "../types/score";
+import "./MedleyList.css";
 
 export interface MedleyListProps {
   medleys: MedleyEntry[];

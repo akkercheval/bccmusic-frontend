@@ -4,17 +4,18 @@ import React, { useState, useEffect } from "react";
 import api from "../services/api";
 import ComposerList from "../components/ComposerList";
 import PartList from "../components/PartList";
-import type { Part } from "../components/PartList";
-import type { ComposerEntry } from "../components/ComposerList";
 import TagsList from "../components/TagsList";
 import MedleyList from "../components/MedleyList";
 import AddEditVendorPopup from "../components/AddEditVendorPopup";
+import type {
+  Part,
+  ComposerEntry,
+  MedleyEntry,
+  ScoreTag,
+  Vendor,
+  CreateScoreRequest,
+} from "../types/score";
 import "./AddNewScore.css";
-
-interface Vendor {
-  vendorId: number;
-  vendorName: string;
-}
 
 interface CollaborationInfo {
   ownerAccountId: number;
@@ -38,11 +39,12 @@ export default function AddNewScore() {
     arrangementType: "",
   });
 
-  // Complex data states
   const [parts, setParts] = useState<Part[]>([]);
-  const [scoreTags, setScoreTags] = useState<
-    { scoreTagId?: number; scoreId?: number; tag: string }[]
-  >([]);
+  const [scoreTags, setScoreTags] = useState<ScoreTag[]>([]);
+  const [medleys, setMedleys] = useState<MedleyEntry[]>([]); // or a lighter version
+  const [scoreComposers, setScoreComposers] = useState<ComposerEntry[]>([
+    { contributionType: "" },
+  ]);
   const [allowedOwners, setAllowedOwners] = useState<CollaborationInfo[]>([]);
   const [arrangementTypes, setArrangementTypes] = useState<
     { code: string; name: string }[]
@@ -56,14 +58,7 @@ export default function AddNewScore() {
     }[]
   >([]);
   const [existingTags, setExistingTags] = useState<string[]>([]);
-  const [medleys, setMedleys] = useState<
-    {
-      medleyId?: number;
-      scoreId?: number;
-      pieceTitle: string;
-      composerId?: number;
-    }[]
-  >([]);
+
   const [existingVendors, setExistingVendors] = useState<Vendor[]>([]);
 
   // UI states
@@ -75,11 +70,6 @@ export default function AddNewScore() {
   const [showVendorPopup, setShowVendorPopup] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const isOwner = user && user.accountType === "OWNER";
-
-  // Score composers managed by ComposerList component
-  const [scoreComposers, setScoreComposers] = useState<ComposerEntry[]>([
-    { contributionType: "" },
-  ]);
 
   // Fetch all initial data safely
   useEffect(() => {
@@ -195,7 +185,7 @@ export default function AddNewScore() {
       return;
     }
 
-    const payload = {
+    const payload: CreateScoreRequest = {
       scoreTitle: formData.scoreTitle.trim(),
       scoreSubtitle: formData.scoreSubtitle?.trim() || null,
       owner: { accountId: parseInt(formData.owner) },
@@ -207,7 +197,7 @@ export default function AddNewScore() {
       grade: formData.grade ? parseFloat(formData.grade) : null,
       arrangementType: { code: formData.arrangementType },
       scoreComposers: scoreComposers.map((c) => ({
-        composer: { composerId: c.composerId },
+        composer: { composerId: c.composerId! },
         contributionType: c.contributionType.trim(),
       })),
       parts: parts.map((p) => ({

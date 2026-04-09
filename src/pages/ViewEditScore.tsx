@@ -1,58 +1,25 @@
 import { useEffect, useState } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
+
 import ComposerList from "../components/ComposerList";
 import PartList from "../components/PartList";
 import TagsList from "../components/TagsList";
-import MedleyList, { type MedleyEntry } from "../components/MedleyList";
-import type { Part } from "../components/PartList";
+import MedleyList from "../components/MedleyList";
 import AddEditVendorPopup from "../components/AddEditVendorPopup";
+
+import type {
+  MusicScore,
+  MedleyEntry,
+  Part,
+  ScoreComposer,
+  ScoreTag,
+  Vendor,
+} from "../types/score";
+
 import "./ViewEditScore.css";
-
-interface Vendor {
-  vendorId: number;
-  vendorName: string;
-}
-
-type TagEntry = { scoreTagId?: number; tag: string };
-
-interface MusicScore {
-  scoreId: number;
-  scoreTitle: string;
-  scoreSubtitle?: string;
-  owner: { accountId: number; accountName: string };
-  purchasedFrom?: Vendor;
-  purchasedDate?: string;
-  purchasedCost?: number;
-  grade?: number;
-  arrangementType: { code: string; name?: string };
-  scoreComposers: {
-    scoreComposerId?: number;
-    scoreId?: number;
-    composer: {
-      composerId?: number;
-      firstName?: string;
-      middleName?: string;
-      lastName?: string;
-      fullName?: string;
-    };
-    contributionType: string;
-  }[];
-  parts: Part[];
-  scoreTags: TagEntry[];
-  medleys: {
-    medleyId?: number;
-    pieceTitle: string;
-    composer: {
-      composerId: number;
-      firstName?: string;
-      middleName?: string;
-      lastName: string;
-      fullName: string;
-    };
-  }[];
-}
 
 export default function ViewEditScore() {
   const { scoreId } = useParams<{ scoreId: string }>();
@@ -67,23 +34,14 @@ export default function ViewEditScore() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showVendorPopup, setShowVendorPopup] = useState(false);
-  const [scoreComposers, setScoreComposers] = useState<
-    {
-      scoreComposerId: number;
-      scoreId: number;
-      composer: {
-        composerId: number;
-        firstName: string;
-        middleName: string;
-        lastName: string;
-        fullName: string;
-      };
-      contributionType: string;
-    }[]
-  >([]);
+
+  // Edit state (separate from main score for clarity)
+  const [scoreComposers, setScoreComposers] = useState<ScoreComposer[]>([]);
   const [parts, setParts] = useState<Part[]>([]);
-  const [scoreTags, setScoreTags] = useState<TagEntry[]>([]);
+  const [scoreTags, setScoreTags] = useState<ScoreTag[]>([]);
   const [medleys, setMedleys] = useState<MedleyEntry[]>([]);
+
+  // Lookup data
   const [existingComposers, setExistingComposers] = useState<
     {
       composerId: number;
@@ -107,10 +65,9 @@ export default function ViewEditScore() {
       } else if (backInfo === "my-scores") {
         navigate("/my-scores");
       } else {
-        navigate(-1); // fallback
+        navigate(-1);
       }
     } else {
-      // No state → probably direct link or refresh → safe back or fallback
       navigate(-1);
     }
   };
@@ -127,33 +84,37 @@ export default function ViewEditScore() {
             api.get("/score-tags"),
           ]);
 
-        setExistingComposers(composersRes.data);
-        setExistingTags(tagsRes.data);
-        setArrangementTypes(arrRes.data);
-        setExistingVendors(vendorsRes.data);
+        setExistingComposers(composersRes.data || []);
+        setExistingTags(tagsRes.data || []);
+        setArrangementTypes(arrRes.data || []);
+        setExistingVendors(vendorsRes.data || []);
 
-        const data = scoreRes.data;
-        const normalizedComposers = (data.scoreComposers || []).map(
-          (sc: any) => ({
-            ...sc,
-            composerId: sc.composer?.composerId,
-            firstName: sc.composer?.firstName,
-            middleName: sc.composer?.middleName,
-            lastName: sc.composer?.lastName,
-            fullName: sc.composer?.fullName,
-          }),
-        );
+        const data: MusicScore = scoreRes.data;
+
+        // Normalize composers for editing (flat structure expected by ComposerList)
+        const normalizedComposers: ScoreComposer[] = (
+          data.scoreComposers || []
+        ).map((sc: any) => ({
+          ...sc,
+          composerId: sc.composer?.composerId,
+          firstName: sc.composer?.firstName,
+          middleName: sc.composer?.middleName,
+          lastName: sc.composer?.lastName,
+          fullName: sc.composer?.fullName,
+        }));
+
         setScore(data);
         setScoreComposers(normalizedComposers);
         setParts(data.parts || []);
         setScoreTags(data.scoreTags || []);
-        setMedleys(data.medleys || []);
+        setMedleys(data.medleys || []); // Note: backend returns nested composer, but MedleyEntry is flat
       } catch (err: any) {
         setError(err.response?.data?.message || "Score not found");
       } finally {
         setIsLoading(false);
       }
     };
+
     loadAll();
   }, [scoreId]);
 
@@ -175,10 +136,10 @@ export default function ViewEditScore() {
         composer: { composerId: c.composer?.composerId },
         contributionType: c.contributionType,
       })),
-      parts: parts,
-      scoreTags: scoreTags,
+      parts,
+      scoreTags,
       medleys: medleys.map((m) => {
-        const composerId = m.composerId ?? null; // flat only now
+        const composerId = m.composerId ?? null;
 
         const composerInfo = existingComposers.find(
           (c) => c.composerId === composerId,
@@ -196,8 +157,8 @@ export default function ViewEditScore() {
 
         return {
           scoreId: score.scoreId,
-          pieceTitle: m.pieceTitle,
-          medleyId: m.medleyId, // undefined for new = fine
+          pieceTitle: m.pieceTitle.trim(),
+          medleyId: m.medleyId,
           composer: composerInfo
             ? {
                 composerId: composerInfo.composerId,
@@ -207,35 +168,27 @@ export default function ViewEditScore() {
                 fullName: displayName,
               }
             : {
-                composerId: composerId,
+                composerId,
                 lastName: "Unknown Composer",
               },
         };
       }),
     };
 
-    const hasInvalidMedley = medleys.some((m) => {
-      const cid =
-        (m as { composerId?: number }).composerId ??
-        (m as { composer?: { composerId?: number } }).composer?.composerId;
-      return !cid || cid <= 0;
-    });
+    // Guard against invalid medleys
+    const hasInvalidMedley = medleys.some(
+      (m) => !m.composerId || m.composerId <= 0,
+    );
     if (hasInvalidMedley) {
       alert("Please select a composer for every medley piece.");
       return;
     }
 
-    console.log("Saving score with payload:", payload);
-    console.log("Parts payload:", parts);
-    console.log("Tags payload:", scoreTags);
-    console.log("Medleys payload:", medleys);
-
     try {
-      console.log("Medleys being saved:", JSON.stringify(medleys, null, 2));
       await api.put(`/scores/${scoreId}`, payload);
       alert("✅ Score saved successfully!");
       setIsEditing(false);
-      window.location.reload();
+      window.location.reload(); // Refresh to get fresh data with audit fields
     } catch (err: any) {
       alert(err.response?.data?.message || "Failed to save changes.");
     }
@@ -248,7 +201,7 @@ export default function ViewEditScore() {
       alert("Score deleted");
       navigate("/my-scores");
     } catch (err) {
-      alert("Failed to delete");
+      alert("Failed to delete score.");
     }
   };
 
@@ -265,8 +218,9 @@ export default function ViewEditScore() {
   return (
     <div className="page-container">
       <div className="page-card">
-        <h1>{isEditing ? "Editing" : "Viewing"}</h1>
-        {!isEditing && (
+        <h1>{isEditing ? "Editing" : "Viewing"} Score</h1>
+
+        {!isEditing && score && (
           <div className="score-details">
             <h2>{score.scoreTitle}</h2>
             <div className="header-actions">
@@ -278,22 +232,26 @@ export default function ViewEditScore() {
                 ← Back to List
               </button>
             </div>
-            {score.owner && (
-              <div>
-                <strong>Owner:</strong> {score.owner.accountName}
-              </div>
-            )}
+
             {score.scoreSubtitle && (
               <div>
                 <strong>Subtitle:</strong> {score.scoreSubtitle}
               </div>
             )}
-            {score.scoreComposers && score.scoreComposers.length > 0 && (
+
+            <div>
+              <strong>Owner:</strong> {score.owner.accountName}
+            </div>
+
+            {/* Composers */}
+            {score.scoreComposers?.length > 0 && (
               <div>
                 {score.scoreComposers.map((c, i) => {
                   const name =
                     c.composer.fullName ||
-                    `${c.composer.firstName || ""} ${c.composer.middleName || ""} ${c.composer.lastName || ""}`.trim() ||
+                    `${c.composer.firstName || ""} ${c.composer.middleName || ""} ${
+                      c.composer.lastName || ""
+                    }`.trim() ||
                     `Composer #${c.composer.composerId}`;
 
                   const contributionDisplay =
@@ -303,20 +261,19 @@ export default function ViewEditScore() {
                         ? "Arranged by"
                         : c.contributionType === "LYRICIST"
                           ? "Lyrics by"
-                          : "Other Contribution";
+                          : "Contribution by";
 
                   return (
-                    <span key={i}>
+                    <div key={i}>
                       <strong>{contributionDisplay}:</strong> {name}
-                      {i < score.scoreComposers.length - 1 ? <br /> : ""}
-                    </span>
+                    </div>
                   );
                 })}
               </div>
             )}
 
             {/* Medleys */}
-            {score.medleys && score.medleys.length > 0 && (
+            {score.medleys?.length > 0 && (
               <div>
                 <strong>Medleys:</strong>
                 <div className="indented-list">
@@ -325,7 +282,6 @@ export default function ViewEditScore() {
                       {m.pieceTitle} by{" "}
                       {m.composer?.fullName ||
                         `Composer #${m.composer?.composerId}`}
-                      {i < score.medleys.length - 1 ? <br /> : ""}
                     </p>
                   ))}
                 </div>
@@ -356,15 +312,16 @@ export default function ViewEditScore() {
               </div>
             )}
 
-            {score.purchasedCost !== undefined && (
-              <div>
-                <strong>Purchased Cost:</strong> $
-                {score.purchasedCost.toFixed(2)}
-              </div>
-            )}
+            {score.purchasedCost !== undefined &&
+              score.purchasedCost !== null && (
+                <div>
+                  <strong>Purchased Cost:</strong> $
+                  {score.purchasedCost.toFixed(2)}
+                </div>
+              )}
 
-            {/* Parts with proper Flex Parts line */}
-            {score.parts && score.parts.length > 0 && (
+            {/* Parts */}
+            {score.parts?.length > 0 && (
               <div>
                 <strong>Parts:</strong>
                 <div className="indented-list">
@@ -387,6 +344,7 @@ export default function ViewEditScore() {
                         {part.instrument} — Total Parts: {part.regularPartCount}
                         {part.hasSolo && " (Solo)"}
                         {flexStr && ` — ${flexStr}`}
+                        {part.partComments && ` — ${part.partComments}`}
                       </p>
                     );
                   })}
@@ -395,28 +353,46 @@ export default function ViewEditScore() {
             )}
 
             {/* Tags */}
-            {score.scoreTags && score.scoreTags.length > 0 && (
+            {score.scoreTags?.length > 0 && (
               <div>
                 <strong>Tags:</strong>{" "}
                 {score.scoreTags.map((t) => t.tag).join(", ")}
               </div>
             )}
+
+            {/* Audit Info - Last Updated */}
+            {(score.updatedAt || score.updatedBy) && (
+              <div className="audit-info">
+                <strong>Last Updated:</strong>{" "}
+                {score.updatedAt
+                  ? new Date(score.updatedAt).toLocaleDateString()
+                  : "—"}
+                {score.updatedBy?.accountName && (
+                  <> by {score.updatedBy.accountName}</>
+                )}
+              </div>
+            )}
           </div>
         )}
+
         {canEdit && (
-          <div>
+          <div className="edit-controls">
             <button
               onClick={() => setIsEditing(!isEditing)}
               className="primary-button"
             >
               {isEditing ? "🚫 Cancel Edit" : "✏️ Edit Score"}
             </button>
+
             {isEditing && (
               <>
                 <button onClick={handleSave} className="primary-button">
                   💾 Save Changes
                 </button>
-                <button onClick={handleDelete} className="primary-button">
+                <button
+                  onClick={handleDelete}
+                  className="primary-button danger"
+                >
                   🗑️ Delete Score
                 </button>
               </>
@@ -424,14 +400,20 @@ export default function ViewEditScore() {
           </div>
         )}
 
-        {isEditing && (
-          <form onSubmit={handleSave} noValidate>
+        {isEditing && score && (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSave();
+            }}
+            noValidate
+          >
+            {/* Basic fields */}
             <div className="form-group">
               <label htmlFor="scoreTitle">Score Title*</label>
               <input
                 type="text"
                 id="scoreTitle"
-                name="scoreTitle"
                 value={score.scoreTitle}
                 onChange={(e) =>
                   setScore((prev) =>
@@ -441,12 +423,12 @@ export default function ViewEditScore() {
                 required
               />
             </div>
+
             <div className="form-group">
               <label htmlFor="scoreSubtitle">Score Subtitle</label>
               <input
                 type="text"
                 id="scoreSubtitle"
-                name="scoreSubtitle"
                 value={score.scoreSubtitle || ""}
                 onChange={(e) =>
                   setScore((prev) =>
@@ -455,25 +437,24 @@ export default function ViewEditScore() {
                 }
               />
             </div>
+
+            {/* Purchased From, Grade, Arrangement Type, Dates, Cost — unchanged but cleaned */}
+
             <div className="form-group">
               <label htmlFor="purchasedFrom">Purchased From</label>
               <select
                 id="purchasedFrom"
-                name="purchasedFrom"
                 value={score.purchasedFrom?.vendorName || ""}
                 onChange={(e) => {
                   if (e.target.value === "new") {
                     setShowVendorPopup(true);
                   } else {
-                    const selectedVendor = existingVendors.find(
+                    const selected = existingVendors.find(
                       (v) => v.vendorName === e.target.value,
                     );
                     setScore((prev) =>
                       prev
-                        ? {
-                            ...prev,
-                            purchasedFrom: selectedVendor || undefined,
-                          }
+                        ? { ...prev, purchasedFrom: selected || undefined }
                         : prev,
                     );
                   }

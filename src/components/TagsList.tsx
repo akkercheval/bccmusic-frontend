@@ -1,16 +1,11 @@
 import React, { useState } from "react";
-import "./TagsList.css";
 import AddNewTagPopup from "./AddNewTagPopup";
-
-export interface TagEntry {
-  scoreTagId?: number;
-  scoreId?: number;
-  tag: string;
-}
+import type { ScoreTag } from "../types/score";
+import "./TagsList.css";
 
 export interface TagsListProps {
-  tags: TagEntry[];
-  setTags: React.Dispatch<React.SetStateAction<TagEntry[]>>;
+  tags: ScoreTag[];
+  setTags: React.Dispatch<React.SetStateAction<ScoreTag[]>>;
   existingTags: string[];
   setExistingTags: React.Dispatch<React.SetStateAction<string[]>>;
 }

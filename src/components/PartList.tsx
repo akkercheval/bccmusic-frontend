@@ -1,16 +1,7 @@
 import React, { useState } from "react";
-import "./PartList.css";
 import AddEditPartPopup from "./AddEditPartPopup";
-
-export interface Part {
-  partId?: number;
-  instrument: string;
-  hasSolo: boolean;
-  regularPartCount: number;
-  flexMinPart?: number | null;
-  flexPartCount?: number | null;
-  partComments?: string | null;
-}
+import type { Part } from "../types/score";
+import "./PartList.css";
 
 interface PartListProps {
   parts: Part[];

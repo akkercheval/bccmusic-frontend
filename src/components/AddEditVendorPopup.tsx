@@ -1,31 +1,16 @@
 import React, { useState } from "react";
 import Popup from "reactjs-popup";
 import api from "../services/api";
-import type { Account } from "../types/Account";
+import type { Vendor } from "../types/score"; // ← shared type
 import "./Popup.css";
 
 interface AddEditVendorPopupProps {
   open: boolean;
   onClose: () => void;
-  onSuccess: (newVendor: {
-    vendorId: number;
-    vendorName: string;
-    streetAddress?: string;
-    city?: string;
-    stateAbbr?: string;
-    zipCode?: string;
-    phoneNumber?: string;
-    phoneType?: string;
-    website?: string;
-    email?: string;
-    createdAt?: string;
-    createdBy?: Account;
-    updatedAt?: string;
-    updatedBy?: Account;
-  }) => void;
+  onSuccess: (newVendor: Vendor) => void; // ← now uses shared Vendor
 }
 
-export default function AddNewComposerPopup({
+export default function AddEditVendorPopup({
   open,
   onClose,
   onSuccess,
@@ -68,7 +53,7 @@ export default function AddNewComposerPopup({
     setIsLoading(true);
     try {
       const response = await api.post("/vendors", payload);
-      const newVendor = response.data;
+      const newVendor: Vendor = response.data; // ← typed
       onSuccess(newVendor);
       onClose();
     } catch (err: any) {

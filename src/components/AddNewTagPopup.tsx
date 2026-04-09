@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import Popup from "reactjs-popup";
-import { type TagEntry } from "./TagsList";
+import { type ScoreTag } from "../types/score";
 import "./AddNewTagPopup.css";
 
 interface AddNewTagPopupProps {
   open: boolean;
   onClose: () => void;
   existingTags: string[];
-  onSuccess: (tag: TagEntry) => void;
+  onSuccess: (tag: ScoreTag) => void;
 }
 
 export default function AddNewTagPopup({
