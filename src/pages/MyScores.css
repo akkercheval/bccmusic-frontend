@@ -25,6 +25,20 @@ h1 {
   padding: 4rem;
 }
 
+.search-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  align-items: flex-end;
+  margin-bottom: 1.5rem;
+}
+
+.search-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 1.5rem;
+}
+
 /* Dark theme overrides for react-data-table-component */
 .rdt_Table {
   background-color: var(--primary-blue) !important;

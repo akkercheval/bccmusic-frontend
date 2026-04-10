@@ -73,7 +73,7 @@ const NavBar = () => {
             className={location.pathname === "/all-scores" ? "active" : ""}
             onClick={closeMenu}
           >
-            Search All Scores
+            All Scores
           </Link>
         </li>
         {isOwner && (
