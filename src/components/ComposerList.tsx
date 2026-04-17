@@ -38,7 +38,7 @@ export default function ComposerList({
   setExistingComposers,
 }: ComposerListProps) {
   const [showPopup, setShowPopup] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(-1);
+  const [pendingIndex, setPendingIndex] = useState<number | null>(null);
 
   const addComposer = () => {
     setComposers([...composers, { contributionType: "" }]);
@@ -53,47 +53,35 @@ export default function ComposerList({
     field: keyof ComposerEntry,
     value: string | number | undefined,
   ) => {
-    console.log(
-      `[UPDATE] Setting row ${index}.${field} =`,
-      value,
-      `(type: ${typeof value})`,
-    );
-
     const newComposers = [...composers];
     newComposers[index] = { ...newComposers[index], [field]: value };
     setComposers(newComposers);
-
-    // Log the composers array right after update
-    console.log("[UPDATE] New composers state:", newComposers);
   };
 
   const handleComposerSelect = (index: number, value: string) => {
-    console.log(
-      `[SELECT] Row ${index} - raw selected value from DOM: "${value}" (length: ${value.length}, type: ${typeof value})`,
-    );
-
     if (value === "new") {
-      setCurrentIndex(index);
+      setPendingIndex(index);
       setShowPopup(true);
       return;
     }
 
     if (!value) {
-      // blank selection
       updateComposer(index, "composerId", undefined);
       return;
     }
 
     const parsedId = Number(value);
-
-    if (isNaN(parsedId)) {
-      console.warn(
-        `[SELECT] Invalid ID conversion: "${value}" → NaN - ignoring update`,
-      );
-      return;
-    }
+    if (isNaN(parsedId)) return;
 
     updateComposer(index, "composerId", parsedId);
+  };
+
+  const handlePopupClose = () => {
+    if (pendingIndex !== null) {
+      updateComposer(pendingIndex, "composerId", undefined);
+      setPendingIndex(null);
+    }
+    setShowPopup(false);
   };
 
   const handleNewComposerSuccess = (newComposer: {
@@ -102,22 +90,11 @@ export default function ComposerList({
     middleName?: string;
     lastName: string;
   }) => {
-    console.log("[SUCCESS] New composer received:", newComposer);
-    console.log("[SUCCESS] Current existing before update:", existingComposers);
-    setExistingComposers((prev) => {
-      const updated = [...prev, newComposer];
-      console.log("[SUCCESS] Updated existing:", updated);
-      return updated;
-    });
+    setExistingComposers((prev) => [...prev, newComposer]);
 
-    if (currentIndex !== -1) {
-      console.log(
-        "[SUCCESS] Setting composerId for row",
-        currentIndex,
-        "to",
-        newComposer.composerId,
-      );
-      updateComposer(currentIndex, "composerId", newComposer.composerId);
+    if (pendingIndex !== null) {
+      updateComposer(pendingIndex, "composerId", newComposer.composerId);
+      setPendingIndex(null);
     }
     setShowPopup(false);
   };
@@ -186,7 +163,7 @@ export default function ComposerList({
 
       <AddNewComposerPopup
         open={showPopup}
-        onClose={() => setShowPopup(false)}
+        onClose={handlePopupClose}
         onSuccess={handleNewComposerSuccess}
       />
     </div>

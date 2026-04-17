@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Popup from "reactjs-popup";
 import api from "../services/api";
 import "./AddEditComposerPopup.css";
@@ -25,6 +25,15 @@ export default function AddEditComposerPopup({
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  useEffect(() => {
+    if (open) {
+      setFirstName("");
+      setMiddleName("");
+      setLastName("");
+      setError(null);
+    }
+  }, [open]);
+
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -47,7 +56,6 @@ export default function AddEditComposerPopup({
       const response = await api.post("/composers", payload);
       const newComposer = response.data;
       onSuccess(newComposer);
-      onClose();
     } catch (err: any) {
       setError(
         err.response?.data?.message ||
