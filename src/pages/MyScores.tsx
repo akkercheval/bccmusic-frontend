@@ -4,6 +4,7 @@ import Select from "react-select";
 import makeAnimated from "react-select/animated";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
+import { extractErrorMessage } from "../utils/errorUtils";
 import { useNavigate } from "react-router-dom";
 import "./MyScores.css";
 
@@ -117,8 +118,8 @@ export default function MyScores() {
 
         setScores(response.data.content || []);
         setTotalRows(response.data.totalElements || 0);
-      } catch (err: any) {
-        setError(err.response?.data?.message || "Failed to load your scores");
+      } catch (err: unknown) {
+        setError(extractErrorMessage(err, "Failed to load your scores"));
         console.error("Error fetching scores:", err);
       } finally {
         setIsLoading(false);

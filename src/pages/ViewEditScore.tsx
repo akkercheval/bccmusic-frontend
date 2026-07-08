@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
+import { extractErrorMessage } from "../utils/errorUtils";
 
 import ComposerList from "../components/ComposerList";
 import PartList from "../components/PartList";
@@ -104,8 +105,8 @@ export default function ViewEditScore() {
         setParts(data.parts || []);
         setScoreTags(data.scoreTags || []);
         setMedleys(data.medleys || []);
-      } catch (err: any) {
-        setError(err.response?.data?.message || "Score not found");
+      } catch (err: unknown) {
+        setError(extractErrorMessage(err, "Score not found"));
       } finally {
         setIsLoading(false);
       }
@@ -186,8 +187,8 @@ export default function ViewEditScore() {
       alert("✅ Score saved successfully!");
       setIsEditing(false);
       window.location.reload();
-    } catch (err: any) {
-      alert(err.response?.data?.message || "Failed to save changes.");
+    } catch (err: unknown) {
+      alert(extractErrorMessage(err, "Failed to save changes."));
     }
   };
 

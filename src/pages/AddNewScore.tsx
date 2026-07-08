@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import React, { useState, useEffect } from "react";
 import api from "../services/api";
+import { extractErrorMessage } from "../utils/errorUtils";
 import ComposerList from "../components/ComposerList";
 import PartList from "../components/PartList";
 import TagsList from "../components/TagsList";
@@ -220,11 +221,9 @@ export default function AddNewScore() {
       setSuccessMessage("Score added successfully!");
       if (isOwner) navigate("/my-scores");
       else navigate("/all-scores");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Submit error:", err);
-      setServerError(
-        err.response?.data?.message || "Failed to add score. Please try again.",
-      );
+      setServerError(extractErrorMessage(err, "Failed to add score. Please try again."));
     } finally {
       setIsLoading(false);
     }

@@ -115,6 +115,7 @@ button[type="submit"]:active {
   margin-left: 10px;
   display: block;
   grid-column: 2 / 3; /* align under input */
+  white-space: pre-line; /* preserve newlines from multi-error messages */
 }
 
 /* Optional: highlight invalid fields */

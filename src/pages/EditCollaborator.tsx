@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
+import { extractErrorMessage } from "../utils/errorUtils";
 
 export default function EditCollaborator() {
   const { collaboratorId } = useParams<{ collaboratorId: string }>();
@@ -40,11 +41,12 @@ export default function EditCollaborator() {
 
         setCollaborator(data);
         setPermissionLevel(data.permissionLevel || "VIEW_ONLY");
-      } catch (err: any) {
-        if (err.response?.status === 403) {
+      } catch (err: unknown) {
+        const axiosErr = err as any;
+        if (axiosErr?.response?.status === 403) {
           setError("You do not have permission to edit this collaboration.");
         } else {
-          setError("Collaboration not found or could not be loaded.");
+          setError(extractErrorMessage(err, "Collaboration not found or could not be loaded."));
         }
       } finally {
         setIsLoading(false);
@@ -69,10 +71,8 @@ export default function EditCollaborator() {
       setTimeout(() => {
         navigate("/my-collaborators");
       }, 1500);
-    } catch (err: any) {
-      setError(
-        err.response?.data?.message || "Failed to update collaboration.",
-      );
+    } catch (err: unknown) {
+      setError(extractErrorMessage(err, "Failed to update collaboration."));
     } finally {
       setIsLoading(false);
     }
@@ -85,8 +85,8 @@ export default function EditCollaborator() {
       await api.delete(`/collaborators/${collaboratorId}`);
       setSuccessMessage("Collaborator removed successfully.");
       setTimeout(() => navigate("/my-collaborators"), 1500);
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to delete collaborator.");
+    } catch (err: unknown) {
+      setError(extractErrorMessage(err, "Failed to delete collaborator."));
     }
   };
 

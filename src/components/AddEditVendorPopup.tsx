@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Popup from "reactjs-popup";
 import api from "../services/api";
+import { extractErrorMessage } from "../utils/errorUtils";
 import type { Vendor } from "../types/score"; // ← shared type
 import "./Popup.css";
 
@@ -56,11 +57,8 @@ export default function AddEditVendorPopup({
       const newVendor: Vendor = response.data; // ← typed
       onSuccess(newVendor);
       onClose();
-    } catch (err: any) {
-      setError(
-        err.response?.data?.message ||
-          "Failed to add vendor. Please try again.",
-      );
+    } catch (err: unknown) {
+      setError(extractErrorMessage(err, "Failed to add vendor. Please try again."));
     } finally {
       setIsLoading(false);
     }

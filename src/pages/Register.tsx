@@ -228,15 +228,20 @@ export default function Register() {
 
         if (status === 400 && data?.details && Array.isArray(data.details)) {
           // Map server validation errors back to form fields
+          // Accumulate multiple errors per field with line breaks
           const serverErrors: Record<string, string> = {};
           data.details.forEach((errMsg: string) => {
             const lowerMsg = errMsg.toLowerCase();
-            if (lowerMsg.includes("username")) serverErrors.username = errMsg;
-            else if (lowerMsg.includes("email")) serverErrors.email = errMsg;
-            else if (lowerMsg.includes("password"))
-              serverErrors.password = errMsg;
-            else if (lowerMsg.includes("zip")) serverErrors.zipCode = errMsg;
-            else serverErrors.general = errMsg;
+            let field: string;
+            if (lowerMsg.includes("username")) field = "username";
+            else if (lowerMsg.includes("email")) field = "email";
+            else if (lowerMsg.includes("password")) field = "password";
+            else if (lowerMsg.includes("zip")) field = "zipCode";
+            else field = "general";
+
+            serverErrors[field] = serverErrors[field]
+              ? `${serverErrors[field]}\n${errMsg}`
+              : errMsg;
           });
           setErrors((prev) => ({ ...prev, ...serverErrors }));
         } else if (data?.message) {
@@ -259,6 +264,7 @@ export default function Register() {
       <h1>Create a New Account</h1>
 
       {serverError && <div className="error server-error">{serverError}</div>}
+      {errors.general && <div className="error server-error">{errors.general}</div>}
       {successMessage && <div className="success">{successMessage}</div>}
 
       <form onSubmit={handleSubmit} noValidate>
@@ -307,7 +313,11 @@ export default function Register() {
             onBlur={handleBlur}
             required
           />
-          {touched.password &&
+          {errors.password && (
+            <span className="error">{errors.password}</span>
+          )}
+          {!errors.password &&
+            touched.password &&
             formData.password &&
             formData.password.length < 8 && (
               <span className="hint">

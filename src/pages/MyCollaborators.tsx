@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
+import { extractErrorMessage } from "../utils/errorUtils";
 import { useNavigate } from "react-router-dom";
 import "./MyCollaborators.css";
 
@@ -67,9 +68,9 @@ export default function MyCollaborators() {
       try {
         const response = await api.get("/collaborators");
         setCollaborators(response.data);
-      } catch (err: any) {
+      } catch (err: unknown) {
         setError(
-          err.response?.data?.message || "Failed to load your collaborators",
+          extractErrorMessage(err, "Failed to load your collaborators"),
         );
         console.error("Error fetching collaborators:", err);
       } finally {

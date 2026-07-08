@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import React, { useState, useEffect } from "react";
 import api from "../services/api";
+import { extractErrorMessage } from "../utils/errorUtils";
 import "./AddNewCollaborator.css";
 
 interface Account {
@@ -69,11 +70,9 @@ export default function AddNewCollaborator() {
       // Reset form
       setSelectedAccountId(null);
       setPermissionLevel("VIEW_ONLY");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error adding collaborator:", error);
-      setServerError(
-        error.response?.data?.message || "An error occurred. Please try again.",
-      );
+      setServerError(extractErrorMessage(error, "An error occurred. Please try again."));
     } finally {
       setIsLoading(false);
     }

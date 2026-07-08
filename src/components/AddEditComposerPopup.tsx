@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Popup from "reactjs-popup";
 import api from "../services/api";
+import { extractErrorMessage } from "../utils/errorUtils";
 import "./AddEditComposerPopup.css";
 
 interface AddEditComposerPopupProps {
@@ -56,11 +57,8 @@ export default function AddEditComposerPopup({
       const response = await api.post("/composers", payload);
       const newComposer = response.data;
       onSuccess(newComposer);
-    } catch (err: any) {
-      setError(
-        err.response?.data?.message ||
-          "Failed to add composer. Please try again.",
-      );
+    } catch (err: unknown) {
+      setError(extractErrorMessage(err, "Failed to add composer. Please try again."));
     } finally {
       setIsLoading(false);
     }
