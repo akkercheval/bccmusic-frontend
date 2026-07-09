@@ -8,11 +8,47 @@ export default defineConfig({
   // Dev server proxy – ONLY used when running `npm run dev` locally
   server: {
     proxy: {
+      // Proxy all backend API paths to the local Spring Boot server.
+      // No rewrite needed — paths pass through as-is.
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,
-        // Rewrite: remove the /api prefix so local backend receives clean paths (e.g. /api/login → /login)
-        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+      '/perform_login': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/logout': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/accounts': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/scores': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/composers': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/collaborators': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/arrangement-types': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/score-tags': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/vendors': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
       },
     },
   },

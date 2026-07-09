@@ -1,20 +1,19 @@
 import { Navigate } from "react-router-dom";
 import { type JSX } from "react";
-import { useEffect, useState } from "react";
-import api from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
+/**
+ * ProtectedRoute wraps child routes and redirects to login
+ * if the user is not authenticated (based on AuthContext).
+ *
+ * Note: Most routes use PrivateLayout instead. This component
+ * is available for one-off protected routes outside the layout.
+ */
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
-  const [isAuth, setIsAuth] = useState<boolean | null>(null);
+  const { user, loading } = useAuth();
 
-  useEffect(() => {
-    api
-      .get("/api/auth/status")
-      .then((res) => setIsAuth(res.data.authenticated))
-      .catch(() => setIsAuth(false));
-  }, []);
-
-  if (isAuth === null) return <div>Loading...</div>;
-  if (!isAuth) return <Navigate to="/login" replace />;
+  if (loading) return <div>Loading...</div>;
+  if (!user) return <Navigate to="/login" replace />;
 
   return children;
 };

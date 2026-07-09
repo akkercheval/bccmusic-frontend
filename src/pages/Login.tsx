@@ -9,6 +9,8 @@ export default function Login() {
   const location = useLocation();
   const justLoggedOut =
     new URLSearchParams(location.search).get("logout") === "success";
+  const sessionExpired =
+    new URLSearchParams(location.search).get("session") === "expired";
   const { refreshUser } = useAuth();
   const [formData, setFormData] = useState({
     username: "",
@@ -89,6 +91,11 @@ export default function Login() {
       <div className="page-card">
         {justLoggedOut && (
           <div className="success">You have been logged out successfully.</div>
+        )}
+        {sessionExpired && (
+          <div className="warning">
+            Your session has expired. Please log in again.
+          </div>
         )}
         <h1>Login to BCC Music</h1>
         <p className="login-subtitle">

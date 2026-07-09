@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 import { extractErrorMessage } from "../utils/errorUtils";
 import { useNavigate } from "react-router-dom";
+import PageTitle from "../components/PageTitle";
 import "./MyCollaborators.css";
 
 interface Collaborator {
@@ -89,7 +90,7 @@ export default function MyCollaborators() {
 
   return (
     <div className="my-collaborators-container">
-      <h2>My Collaborators</h2>
+      <PageTitle title="My Collaborators" />
       <p>
         Logged in as: <strong>{user.accountName}</strong>
       </p>

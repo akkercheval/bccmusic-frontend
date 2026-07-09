@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 import { extractErrorMessage } from "../utils/errorUtils";
+import PageTitle from "../components/PageTitle";
 
 export default function EditCollaborator() {
   const { collaboratorId } = useParams<{ collaboratorId: string }>();
@@ -96,7 +97,7 @@ export default function EditCollaborator() {
     return (
       <div className="page-container">
         <div className="page-card">
-          <h1>Access Denied</h1>
+          <PageTitle title="Access Denied" />
           <p className="server-error">{error}</p>
           <button
             onClick={() => navigate("/my-collaborators")}
@@ -112,7 +113,7 @@ export default function EditCollaborator() {
   return (
     <div className="page-container">
       <div className="page-card">
-        <h1>Edit Collaboration</h1>
+        <PageTitle title="Edit Collaboration" />
 
         {successMessage && <div className="success">{successMessage}</div>}
 

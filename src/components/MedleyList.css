@@ -17,6 +17,7 @@
   grid-template-columns: 3fr 3fr 0.2fr;
   gap: 2.0rem;
   margin-bottom: 1rem;
+  margin-left: 1.5rem;
   padding: 1rem;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 8px;
@@ -57,7 +58,7 @@
 }
 
 .remove-btn {
-  background: #ff6b6b;
+  background: var(--accent-red);
   color: white;
   border: none;
   padding: 0.5rem 0.75rem;
@@ -69,5 +70,5 @@
 }
 
 .remove-btn:hover {
-  background: #ff5252;
+  background: var(--hover-red);
 }

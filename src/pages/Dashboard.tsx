@@ -2,7 +2,15 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useEffect } from "react";
 import api from "../services/api";
+import PageTitle from "../components/PageTitle";
 import "./Dashboard.css";
+
+interface NavCard {
+  icon: string;
+  label: string;
+  description: string;
+  path: string;
+}
 
 export default function Dashboard() {
   const { user, loading, refreshUser } = useAuth();
@@ -35,92 +43,89 @@ export default function Dashboard() {
     }
   };
 
+  // Build nav cards based on role
+  const cards: NavCard[] = [];
+
+  cards.push({
+    icon: "𝄞",
+    label: "All Scores",
+    description: "Search and browse the full music catalog",
+    path: "/all-scores",
+  });
+
+  if (isOwner) {
+    cards.push({
+      icon: "♫",
+      label: "My Scores",
+      description: "View and manage your personal collection",
+      path: "/my-scores",
+    });
+  }
+
+  if (isOwner || isAdmin || isCollaborator) {
+    cards.push({
+      icon: "✚",
+      label: "Add a New Score",
+      description: "Catalog a new piece in the library",
+      path: "/add-new-score",
+    });
+  }
+
+  if (isOwner) {
+    cards.push({
+      icon: "♪♪",
+      label: "My Collaborators",
+      description: "Manage who can edit your scores",
+      path: "/my-collaborators",
+    });
+  }
+
+  if (isAdmin) {
+    cards.push({
+      icon: "⚙",
+      label: "Manage Accounts",
+      description: "Administer all user accounts",
+      path: "/admin/manage-accounts",
+    });
+  }
+
   return (
-    <div className="page-container">
-      <div className="page-card dashboard-card">
-        <h1>
-          Welcome back, <br />
-          {user.accountName}!
-        </h1>
-        <p>
-          Account Type: <strong>{user.accountType}</strong>
-        </p>
+    <div className="dashboard-container">
+      <PageTitle title="Welcome Back" />
 
-        <div className="button-group">
-          {/* Always shown: Update My Account */}
-          {/*}
-          <button
-            onClick={() => navigate("/account/update")}
-            className="link-button"
-          >
-            Update My Account
-          </button> */}
+      <div className="dashboard-greeting">
+        <p className="dashboard-user-name">{user.accountName}</p>
+        <p className="dashboard-account-type">{user.accountType}</p>
+      </div>
 
-          {/* Always shown: Search All Scores */}
-          <button
-            onClick={() => navigate("/all-scores")}
-            className="link-button"
-          >
-            Search All Scores
-          </button>
-
-          {/* Owner: View My Scores */}
-          {isOwner && (
+      <nav className="dashboard-nav" aria-label="Dashboard navigation">
+        <div className="dashboard-grid">
+          {cards.map((card) => (
             <button
-              onClick={() => navigate("/my-scores")}
-              className="link-button"
+              key={card.path}
+              className="dashboard-card"
+              onClick={() => navigate(card.path)}
+              aria-label={`${card.label}: ${card.description}`}
             >
-              View My Scores
+              <span className="dashboard-card-icon" aria-hidden="true">
+                {card.icon}
+              </span>
+              <span className="dashboard-card-label">{card.label}</span>
+              <span className="dashboard-card-desc">{card.description}</span>
             </button>
-          )}
-
-          {/* Collaborator / Owner / Admin: Add a New Score */}
-          {(isOwner || isAdmin || isCollaborator) && (
-            <button
-              onClick={() => navigate("/add-new-score")}
-              className="link-button"
-            >
-              Add a New Score
-            </button>
-          )}
-
-          {/* Owner / Admin: Manage My Collaborators */}
-          {isOwner && (
-            <button
-              onClick={() => navigate("/my-collaborators")}
-              className="link-button"
-            >
-              Manage My Collaborators
-            </button>
-          )}
-
-          {/* Collaborator with SCORE_COLLAB_EDIT: View/Manage Other Accounts (future) */}
-          {/* We'll add this later when you implement the permission check */}
-          {/* For now, it's commented out */}
-          {/* {isCollaborator && hasCollabEditPermission && ( */}
-          {/*   <button */}
-          {/*     onClick={() => navigate("/collaborator-dashboard")} */}
-          {/*     className="link-button" */}
-          {/*   > */}
-          {/*     View/Manage Other Collaborators */}
-          {/*   </button> */}
-          {/* )} */}
-
-          {/* Admin: Manage All Accounts */}
-          {isAdmin && (
-            <button
-              onClick={() => navigate("/admin/manage-accounts")}
-              className="link-button"
-            >
-              Manage All Accounts
-            </button>
-          )}
-
-          {/* Always shown: Logout */}
-          <button onClick={handleLogout} className="link-button">
-            Logout
-          </button>
+          ))}
         </div>
+      </nav>
+
+      <div className="dashboard-footer">
+        <button onClick={handleLogout} className="dashboard-logout">
+          Logout
+        </button>
+      </div>
+
+      {/* Decorative staff at bottom */}
+      <div className="dashboard-staff" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
       </div>
     </div>
   );

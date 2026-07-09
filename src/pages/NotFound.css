@@ -1,0 +1,140 @@
+.not-found-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.not-found-card {
+  background-color: var(--primary-blue);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  padding: 3rem 2.5rem;
+  max-width: 560px;
+  width: 100%;
+  text-align: center;
+  overflow: hidden;
+}
+
+/* Staff lines - decorative musical staves */
+.staff-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 1rem 0;
+  opacity: 0.3;
+}
+
+.staff-line {
+  display: block;
+  height: 2px;
+  background-color: var(--text-light);
+  border-radius: 1px;
+}
+
+/* Main content */
+.not-found-content {
+  padding: 1.5rem 0;
+}
+
+.rest-symbol {
+  font-size: 4rem;
+  color: var(--primary-yellow);
+  margin: 0;
+  line-height: 1;
+}
+
+.not-found-card h1 {
+  font-size: 5rem;
+  color: var(--primary-yellow);
+  margin: 0.25rem 0;
+  letter-spacing: 0.1em;
+}
+
+.not-found-card h2 {
+  font-size: 1.4rem;
+  color: var(--text-light);
+  margin: 0.75rem 0 1.25rem;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.not-found-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-light);
+  opacity: 0.8;
+  margin: 0 auto 1.5rem;
+  max-width: 400px;
+  line-height: 1.6;
+}
+
+/* Floating notes animation */
+.not-found-notes {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.note {
+  font-size: 2rem;
+  color: var(--primary-yellow);
+  opacity: 0.7;
+  animation: float 3s ease-in-out infinite;
+}
+
+.note:nth-child(1) { animation-delay: 0s; }
+.note:nth-child(2) { animation-delay: 0.4s; }
+.note:nth-child(3) { animation-delay: 0.8s; }
+.note:nth-child(4) { animation-delay: 1.2s; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* Back link styled as a button */
+.not-found-link {
+  display: inline-block;
+  background-color: var(--primary-yellow);
+  color: var(--primary-blue);
+  font-family: inherit;
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 0.9rem 2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  margin-top: 1rem;
+}
+
+.not-found-link:hover {
+  background-color: var(--hover-yellow);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.not-found-link:active {
+  transform: translateY(0);
+}
+
+/* Focus visible for keyboard navigation (WCAG) */
+.not-found-link:focus-visible {
+  outline: 3px solid var(--primary-yellow);
+  outline-offset: 3px;
+}
+
+@media (max-width: 480px) {
+  .not-found-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .not-found-card h1 {
+    font-size: 3.5rem;
+  }
+
+  .not-found-card h2 {
+    font-size: 1.2rem;
+  }
+}

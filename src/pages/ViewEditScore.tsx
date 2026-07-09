@@ -3,12 +3,9 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 import { extractErrorMessage } from "../utils/errorUtils";
-
-import ComposerList from "../components/ComposerList";
-import PartList from "../components/PartList";
-import TagsList from "../components/TagsList";
-import MedleyList from "../components/MedleyList";
-import AddEditVendorPopup from "../components/AddEditVendorPopup";
+import { useScoreFormData } from "../hooks/useScoreFormData";
+import PageTitle from "../components/PageTitle";
+import ScoreForm, { type ScoreFormFields } from "../components/ScoreForm";
 
 import type {
   MusicScore,
@@ -29,32 +26,38 @@ export default function ViewEditScore() {
 
   const backInfo = location.state?.from as string | undefined;
 
+  // Shared reference data
+  const {
+    existingComposers,
+    setExistingComposers,
+    arrangementTypes,
+    existingVendors,
+    setExistingVendors,
+    existingTags,
+    setExistingTags,
+  } = useScoreFormData();
+
   const [score, setScore] = useState<MusicScore | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showVendorPopup, setShowVendorPopup] = useState(false);
 
-  // Editing states - using flat shapes that the list components expect
+  // Editing states
   const [scoreComposers, setScoreComposers] = useState<ComposerEntry[]>([]);
   const [parts, setParts] = useState<Part[]>([]);
   const [scoreTags, setScoreTags] = useState<ScoreTag[]>([]);
   const [medleys, setMedleys] = useState<MedleyEntry[]>([]);
 
-  // Lookup / reference data
-  const [existingComposers, setExistingComposers] = useState<
-    {
-      composerId: number;
-      firstName?: string;
-      middleName?: string;
-      lastName: string;
-    }[]
-  >([]);
-  const [existingTags, setExistingTags] = useState<string[]>([]);
-  const [arrangementTypes, setArrangementTypes] = useState<
-    { code: string; name: string }[]
-  >([]);
-  const [existingVendors, setExistingVendors] = useState<Vendor[]>([]);
+  // Form fields for editing (derived from score)
+  const [formFields, setFormFields] = useState<ScoreFormFields>({
+    scoreTitle: "",
+    scoreSubtitle: "",
+    purchasedFrom: null,
+    purchasedDate: null,
+    purchasedCost: null,
+    grade: null,
+    arrangementType: "",
+  });
 
   const canEdit = user && score && user.accountId === score.owner.accountId;
 
@@ -68,43 +71,43 @@ export default function ViewEditScore() {
     }
   };
 
+  // Load the score
   useEffect(() => {
-    const loadAll = async () => {
+    const loadScore = async () => {
       try {
-        const [scoreRes, composersRes, arrRes, vendorsRes, tagsRes] =
-          await Promise.all([
-            api.get(`/scores/${scoreId}`),
-            api.get("/composers"),
-            api.get("/arrangement-types"),
-            api.get("/vendors"),
-            api.get("/score-tags"),
-          ]);
-
-        setExistingComposers(composersRes.data || []);
-        setExistingTags(tagsRes.data || []);
-        setArrangementTypes(arrRes.data || []);
-        setExistingVendors(vendorsRes.data || []);
-
-        const data: MusicScore = scoreRes.data;
-
-        // Normalize for editing: convert nested composer → flat ComposerEntry
-        const normalizedComposers: ComposerEntry[] = (
-          data.scoreComposers || []
-        ).map((sc: any) => ({
-          scoreComposerId: sc.scoreComposerId,
-          composerId: sc.composer?.composerId,
-          firstName: sc.composer?.firstName,
-          middleName: sc.composer?.middleName,
-          lastName: sc.composer?.lastName,
-          fullName: sc.composer?.fullName,
-          contributionType: sc.contributionType,
-        }));
+        const res = await api.get(`/scores/${scoreId}`);
+        const data: MusicScore = res.data;
 
         setScore(data);
+
+        // Normalize composers for editing
+        const normalizedComposers: ComposerEntry[] = (data.scoreComposers || []).map(
+          (sc: any) => ({
+            scoreComposerId: sc.scoreComposerId,
+            composerId: sc.composer?.composerId,
+            firstName: sc.composer?.firstName,
+            middleName: sc.composer?.middleName,
+            lastName: sc.composer?.lastName,
+            fullName: sc.composer?.fullName,
+            contributionType: sc.contributionType,
+          }),
+        );
+
         setScoreComposers(normalizedComposers);
         setParts(data.parts || []);
         setScoreTags(data.scoreTags || []);
         setMedleys(data.medleys || []);
+
+        // Populate form fields
+        setFormFields({
+          scoreTitle: data.scoreTitle,
+          scoreSubtitle: data.scoreSubtitle || "",
+          purchasedFrom: data.purchasedFrom || null,
+          purchasedDate: data.purchasedDate || null,
+          purchasedCost: data.purchasedCost != null ? String(data.purchasedCost) : null,
+          grade: data.grade != null ? String(data.grade) : null,
+          arrangementType: data.arrangementType?.code || "",
+        });
       } catch (err: unknown) {
         setError(extractErrorMessage(err, "Score not found"));
       } finally {
@@ -112,22 +115,38 @@ export default function ViewEditScore() {
       }
     };
 
-    loadAll();
+    loadScore();
   }, [scoreId]);
+
+  const handleFieldChange = (name: string, value: string) => {
+    setFormFields((prev) => ({ ...prev, [name]: value }));
+    // Also keep the score object in sync for view mode title
+    if (name === "scoreTitle") {
+      setScore((prev) => (prev ? { ...prev, scoreTitle: value } : prev));
+    }
+    if (name === "scoreSubtitle") {
+      setScore((prev) => (prev ? { ...prev, scoreSubtitle: value } : prev));
+    }
+  };
+
+  const handleVendorChange = (vendor: Vendor | null) => {
+    setFormFields((prev) => ({ ...prev, purchasedFrom: vendor }));
+    setScore((prev) => (prev ? { ...prev, purchasedFrom: vendor || undefined } : prev));
+  };
 
   const handleSave = async () => {
     if (!score) return;
 
     const payload = {
       scoreId: score.scoreId,
-      scoreTitle: score.scoreTitle,
-      scoreSubtitle: score.scoreSubtitle || null,
+      scoreTitle: formFields.scoreTitle.trim(),
+      scoreSubtitle: formFields.scoreSubtitle?.trim() || null,
       owner: { accountId: score.owner.accountId },
-      purchasedFrom: score.purchasedFrom || null,
-      purchasedDate: score.purchasedDate || null,
-      purchasedCost: score.purchasedCost || null,
-      grade: score.grade || null,
-      arrangementType: score.arrangementType,
+      purchasedFrom: formFields.purchasedFrom || null,
+      purchasedDate: formFields.purchasedDate || null,
+      purchasedCost: formFields.purchasedCost ? parseFloat(formFields.purchasedCost) : null,
+      grade: formFields.grade ? parseFloat(formFields.grade) : null,
+      arrangementType: { code: formFields.arrangementType },
       scoreComposers: scoreComposers.map((c) => ({
         scoreComposerId: c.scoreComposerId ?? null,
         composer: {
@@ -146,13 +165,8 @@ export default function ViewEditScore() {
         const composerInfo = existingComposers.find(
           (c) => c.composerId === composerId,
         );
-
         const displayName = composerInfo
-          ? [
-              composerInfo.firstName,
-              composerInfo.middleName,
-              composerInfo.lastName,
-            ]
+          ? [composerInfo.firstName, composerInfo.middleName, composerInfo.lastName]
               .filter(Boolean)
               .join(" ") || `Composer #${composerInfo.composerId}`
           : `Composer #${composerId || "unknown"}`;
@@ -203,12 +217,6 @@ export default function ViewEditScore() {
     }
   };
 
-  const handleNewVendorSuccess = (newVendor: Vendor) => {
-    setExistingVendors((prev) => [...prev, newVendor]);
-    setScore((prev) => (prev ? { ...prev, purchasedFrom: newVendor } : prev));
-    setShowVendorPopup(false);
-  };
-
   if (isLoading) return <div className="loading">Loading score...</div>;
   if (error || !score)
     return <div className="error-message">{error || "Score not found"}</div>;
@@ -216,8 +224,9 @@ export default function ViewEditScore() {
   return (
     <div className="page-container">
       <div className="page-card">
-        <h1>{isEditing ? "Editing" : "Viewing"} Score</h1>
+        <PageTitle title={isEditing ? "Editing Score" : "Viewing Score"} />
 
+        {/* View mode */}
         {!isEditing && score && (
           <div className="score-details">
             <h2>{score.scoreTitle}</h2>
@@ -232,16 +241,11 @@ export default function ViewEditScore() {
             </div>
 
             {score.scoreSubtitle && (
-              <div>
-                <strong>Subtitle:</strong> {score.scoreSubtitle}
-              </div>
+              <div><strong>Subtitle:</strong> {score.scoreSubtitle}</div>
             )}
 
-            <div>
-              <strong>Owner:</strong> {score.owner.accountName}
-            </div>
+            <div><strong>Owner:</strong> {score.owner.accountName}</div>
 
-            {/* Composers */}
             {score.scoreComposers?.length > 0 && (
               <div>
                 {score.scoreComposers.map((c, i) => {
@@ -249,92 +253,62 @@ export default function ViewEditScore() {
                     c.composer.fullName ||
                     `${c.composer.firstName || ""} ${c.composer.middleName || ""} ${c.composer.lastName || ""}`.trim() ||
                     `Composer #${c.composer.composerId}`;
-
                   const contributionDisplay =
-                    c.contributionType === "COMPOSER"
-                      ? "Composed by"
-                      : c.contributionType === "ARRANGER"
-                        ? "Arranged by"
-                        : c.contributionType === "LYRICIST"
-                          ? "Lyrics by"
-                          : "Contribution by";
-
+                    c.contributionType === "COMPOSER" ? "Composed by"
+                    : c.contributionType === "ARRANGER" ? "Arranged by"
+                    : c.contributionType === "LYRICIST" ? "Lyrics by"
+                    : "Contribution by";
                   return (
-                    <div key={i}>
-                      <strong>{contributionDisplay}:</strong> {name}
-                    </div>
+                    <div key={i}><strong>{contributionDisplay}:</strong> {name}</div>
                   );
                 })}
               </div>
             )}
 
-            {/* Medleys */}
             {score.medleys?.length > 0 && (
               <div>
                 <strong>Medleys:</strong>
                 <div className="indented-list">
                   {score.medleys.map((m, i) => (
                     <p key={i}>
-                      {m.pieceTitle} by{" "}
-                      {m.composer?.fullName ||
-                        `Composer #${m.composer?.composerId}`}
+                      {m.pieceTitle} by {m.composer?.fullName || `Composer #${m.composer?.composerId}`}
                     </p>
                   ))}
                 </div>
               </div>
             )}
 
-            <div>
-              <strong>Grade:</strong> {score.grade ?? "—"}
-            </div>
+            <div><strong>Grade:</strong> {score.grade ?? "—"}</div>
 
             {score.arrangementType && (
-              <div>
-                <strong>Arrangement Type:</strong>{" "}
-                {score.arrangementType.name || score.arrangementType.code}
-              </div>
+              <div><strong>Arrangement Type:</strong> {score.arrangementType.name || score.arrangementType.code}</div>
             )}
 
             {score.purchasedFrom && (
-              <div>
-                <strong>Purchased From:</strong>{" "}
-                {score.purchasedFrom.vendorName}
-              </div>
+              <div><strong>Purchased From:</strong> {score.purchasedFrom.vendorName}</div>
             )}
 
             {score.purchasedDate && (
-              <div>
-                <strong>Purchased Date:</strong> {score.purchasedDate}
-              </div>
+              <div><strong>Purchased Date:</strong> {score.purchasedDate}</div>
             )}
 
-            {score.purchasedCost !== undefined &&
-              score.purchasedCost !== null && (
-                <div>
-                  <strong>Purchased Cost:</strong> $
-                  {score.purchasedCost.toFixed(2)}
-                </div>
-              )}
+            {score.purchasedCost != null && (
+              <div><strong>Purchased Cost:</strong> ${score.purchasedCost.toFixed(2)}</div>
+            )}
 
-            {/* Parts */}
             {score.parts?.length > 0 && (
               <div>
                 <strong>Parts:</strong>
                 <div className="indented-list">
                   {score.parts.map((part) => {
                     let flexStr = "";
-                    if (
-                      part.flexMinPart != null &&
-                      part.flexPartCount != null &&
-                      part.flexPartCount > 0
-                    ) {
+                    if (part.flexMinPart != null && part.flexPartCount != null && part.flexPartCount > 0) {
                       const flexNumbers = Array.from(
                         { length: part.flexPartCount },
                         (_, i) => part.flexMinPart! + i,
                       );
                       flexStr = `Flex Parts: ${flexNumbers.join(", ")}`;
                     }
-
                     return (
                       <p key={part.partId || part.instrument}>
                         {part.instrument} — Total Parts: {part.regularPartCount}
@@ -348,35 +322,24 @@ export default function ViewEditScore() {
               </div>
             )}
 
-            {/* Tags */}
             {score.scoreTags?.length > 0 && (
-              <div>
-                <strong>Tags:</strong>{" "}
-                {score.scoreTags.map((t) => t.tag).join(", ")}
-              </div>
+              <div><strong>Tags:</strong> {score.scoreTags.map((t) => t.tag).join(", ")}</div>
             )}
 
-            {/* Audit Info - Last Updated */}
             {(score.updatedAt || score.updatedBy) && (
               <div className="audit-info">
                 <strong>Last Updated:</strong>{" "}
-                {score.updatedAt
-                  ? new Date(score.updatedAt).toLocaleDateString()
-                  : "—"}
-                {score.updatedBy?.accountName && (
-                  <> by {score.updatedBy.accountName}</>
-                )}
+                {score.updatedAt ? new Date(score.updatedAt).toLocaleDateString() : "—"}
+                {score.updatedBy?.accountName && <> by {score.updatedBy.accountName}</>}
               </div>
             )}
           </div>
         )}
 
+        {/* Edit controls */}
         {canEdit && (
           <div className="edit-controls">
-            <button
-              onClick={() => setIsEditing(!isEditing)}
-              className="primary-button"
-            >
+            <button onClick={() => setIsEditing(!isEditing)} className="primary-button">
               {isEditing ? "🚫 Cancel Edit" : "✏️ Edit Score"}
             </button>
             {isEditing && (
@@ -384,10 +347,7 @@ export default function ViewEditScore() {
                 <button onClick={handleSave} className="primary-button">
                   💾 Save Changes
                 </button>
-                <button
-                  onClick={handleDelete}
-                  className="primary-button danger"
-                >
+                <button onClick={handleDelete} className="primary-button danger">
                   🗑️ Delete Score
                 </button>
               </>
@@ -395,173 +355,32 @@ export default function ViewEditScore() {
           </div>
         )}
 
+        {/* Edit mode */}
         {isEditing && score && (
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSave();
-            }}
-            noValidate
-          >
-            {/* Basic fields */}
-            <div className="form-group">
-              <label htmlFor="scoreTitle">Score Title*</label>
-              <input
-                type="text"
-                id="scoreTitle"
-                value={score.scoreTitle}
-                onChange={(e) =>
-                  setScore((prev) =>
-                    prev ? { ...prev, scoreTitle: e.target.value } : prev,
-                  )
-                }
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="scoreSubtitle">Score Subtitle</label>
-              <input
-                type="text"
-                id="scoreSubtitle"
-                value={score.scoreSubtitle || ""}
-                onChange={(e) =>
-                  setScore((prev) =>
-                    prev ? { ...prev, scoreSubtitle: e.target.value } : prev,
-                  )
-                }
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="purchasedFrom">Purchased From</label>
-              <select
-                id="purchasedFrom"
-                value={score.purchasedFrom?.vendorName || ""}
-                onChange={(e) => {
-                  if (e.target.value === "new") {
-                    setShowVendorPopup(true);
-                  } else {
-                    const selected = existingVendors.find(
-                      (v) => v.vendorName === e.target.value,
-                    );
-                    setScore((prev) =>
-                      prev
-                        ? { ...prev, purchasedFrom: selected || undefined }
-                        : prev,
-                    );
-                  }
-                }}
-              >
-                <option value="">— Select or create vendor —</option>
-                {existingVendors.map((v) => (
-                  <option key={v.vendorId} value={v.vendorName}>
-                    {v.vendorName}
-                  </option>
-                ))}
-                <option value="new">+ Create new vendor</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label htmlFor="grade">Grade</label>
-              <input
-                type="number"
-                step="0.5"
-                id="grade"
-                value={score.grade || ""}
-                onChange={(e) =>
-                  setScore((prev) =>
-                    prev
-                      ? {
-                          ...prev,
-                          grade: parseFloat(e.target.value) || undefined,
-                        }
-                      : prev,
-                  )
-                }
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="arrangementType">Arrangement Type*</label>
-              <select
-                id="arrangementType"
-                value={score.arrangementType.code}
-                onChange={(e) =>
-                  setScore((prev) =>
-                    prev
-                      ? { ...prev, arrangementType: { code: e.target.value } }
-                      : prev,
-                  )
-                }
-              >
-                {arrangementTypes.map((t) => (
-                  <option key={t.code} value={t.code}>
-                    {t.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group">
-              <label htmlFor="purchasedDate">Purchased Date</label>
-              <input
-                type="date"
-                id="purchasedDate"
-                value={score.purchasedDate || ""}
-                onChange={(e) =>
-                  setScore((prev) =>
-                    prev ? { ...prev, purchasedDate: e.target.value } : prev,
-                  )
-                }
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="purchasedCost">Purchased Cost</label>
-              <input
-                type="number"
-                step="0.01"
-                id="purchasedCost"
-                value={score.purchasedCost || ""}
-                onChange={(e) =>
-                  setScore((prev) =>
-                    prev
-                      ? {
-                          ...prev,
-                          purchasedCost:
-                            parseFloat(e.target.value) || undefined,
-                        }
-                      : prev,
-                  )
-                }
-              />
-            </div>
-
-            <ComposerList
-              composers={scoreComposers}
-              setComposers={setScoreComposers}
+          <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} noValidate>
+            <ScoreForm
+              fields={formFields}
+              onFieldChange={handleFieldChange}
+              onVendorChange={handleVendorChange}
+              arrangementTypes={arrangementTypes}
               existingComposers={existingComposers}
               setExistingComposers={setExistingComposers}
-            />
-            <PartList parts={parts} setParts={setParts} />
-            <TagsList
-              tags={scoreTags}
-              setTags={setScoreTags}
+              existingVendors={existingVendors}
+              setExistingVendors={setExistingVendors}
               existingTags={existingTags}
               setExistingTags={setExistingTags}
-            />
-            <MedleyList
+              composers={scoreComposers}
+              setComposers={setScoreComposers}
+              parts={parts}
+              setParts={setParts}
+              scoreTags={scoreTags}
+              setScoreTags={setScoreTags}
               medleys={medleys}
               setMedleys={setMedleys}
-              existingComposers={existingComposers}
-              setExistingComposers={setExistingComposers}
             />
           </form>
         )}
       </div>
-      <AddEditVendorPopup
-        open={showVendorPopup}
-        onClose={() => setShowVendorPopup(false)}
-        onSuccess={handleNewVendorSuccess}
-      />
     </div>
   );
 }

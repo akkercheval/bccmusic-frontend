@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import React, { useState, useEffect } from "react";
 import api from "../services/api";
 import { extractErrorMessage } from "../utils/errorUtils";
+import PageTitle from "../components/PageTitle";
 import "./AddNewCollaborator.css";
 
 interface Account {
@@ -80,7 +81,7 @@ export default function AddNewCollaborator() {
 
   return (
     <div className="new-collaborator-form">
-      <h2>Add New Collaborator</h2>
+      <PageTitle title="Add New Collaborator" />
 
       {serverError && <div className="server-error">{serverError}</div>}
       {errors && (

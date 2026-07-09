@@ -3,11 +3,9 @@ import { useAuth } from "../context/AuthContext";
 import React, { useState, useEffect } from "react";
 import api from "../services/api";
 import { extractErrorMessage } from "../utils/errorUtils";
-import ComposerList from "../components/ComposerList";
-import PartList from "../components/PartList";
-import TagsList from "../components/TagsList";
-import MedleyList from "../components/MedleyList";
-import AddEditVendorPopup from "../components/AddEditVendorPopup";
+import { useScoreFormData } from "../hooks/useScoreFormData";
+import PageTitle from "../components/PageTitle";
+import ScoreForm, { type ScoreFormFields } from "../components/ScoreForm";
 import type {
   Part,
   ComposerEntry,
@@ -28,39 +26,40 @@ export default function AddNewScore() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
+  // Shared reference data
+  const {
+    existingComposers,
+    setExistingComposers,
+    arrangementTypes,
+    existingVendors,
+    setExistingVendors,
+    existingTags,
+    setExistingTags,
+    loading: refDataLoading,
+    error: refDataError,
+  } = useScoreFormData();
+
   // Form state
-  const [formData, setFormData] = useState({
+  const [formFields, setFormFields] = useState<ScoreFormFields>({
     scoreTitle: "",
     scoreSubtitle: "",
-    owner: "",
-    purchasedFrom: null as Vendor | null,
-    purchasedDate: null as string | null,
-    purchasedCost: null as string | null,
-    grade: null as string | null,
+    purchasedFrom: null,
+    purchasedDate: null,
+    purchasedCost: null,
+    grade: null,
     arrangementType: "",
   });
 
+  const [owner, setOwner] = useState("");
+  const [allowedOwners, setAllowedOwners] = useState<CollaborationInfo[]>([]);
+  const [ownersLoading, setOwnersLoading] = useState(true);
+
   const [parts, setParts] = useState<Part[]>([]);
   const [scoreTags, setScoreTags] = useState<ScoreTag[]>([]);
-  const [medleys, setMedleys] = useState<MedleyEntry[]>([]); // or a lighter version
+  const [medleys, setMedleys] = useState<MedleyEntry[]>([]);
   const [scoreComposers, setScoreComposers] = useState<ComposerEntry[]>([
     { contributionType: "" },
   ]);
-  const [allowedOwners, setAllowedOwners] = useState<CollaborationInfo[]>([]);
-  const [arrangementTypes, setArrangementTypes] = useState<
-    { code: string; name: string }[]
-  >([]);
-  const [existingComposers, setExistingComposers] = useState<
-    {
-      composerId: number;
-      firstName?: string;
-      middleName?: string;
-      lastName: string;
-    }[]
-  >([]);
-  const [existingTags, setExistingTags] = useState<string[]>([]);
-
-  const [existingVendors, setExistingVendors] = useState<Vendor[]>([]);
 
   // UI states
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -68,59 +67,38 @@ export default function AddNewScore() {
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [showVendorPopup, setShowVendorPopup] = useState(false);
-  const [loadingData, setLoadingData] = useState(true);
   const isOwner = user && user.accountType === "OWNER";
 
-  // Fetch all initial data safely
+  // Fetch allowed owners (specific to Add page)
   useEffect(() => {
     if (authLoading || !user) return;
 
-    const fetchInitialData = async () => {
-      setLoadingData(true);
-      setServerError(null);
-
+    const fetchOwners = async () => {
       try {
-        const [ownersRes, composersRes, arrangementRes, vendorsRes, tagsRes] =
-          await Promise.all([
-            api.get("/collaborators/myAllowedOwners"),
-            api.get("/composers"),
-            api.get("/arrangement-types"),
-            api.get("/vendors"),
-            api.get("/score-tags"),
-          ]);
+        const res = await api.get("/collaborators/myAllowedOwners");
+        const owners: CollaborationInfo[] = Array.isArray(res.data) ? res.data : [];
+        setAllowedOwners(owners);
 
-        // Safe array handling for all responses
-        setAllowedOwners(Array.isArray(ownersRes.data) ? ownersRes.data : []);
-        setExistingComposers(
-          Array.isArray(composersRes.data) ? composersRes.data : [],
-        );
-        setArrangementTypes(
-          Array.isArray(arrangementRes.data) ? arrangementRes.data : [],
-        );
-        setExistingVendors(
-          Array.isArray(vendorsRes.data) ? vendorsRes.data : [],
-        );
-        setExistingTags(Array.isArray(tagsRes.data) ? tagsRes.data : []);
-      } catch (err: any) {
-        console.error("Failed to load initial data:", err);
-        setServerError(
-          "Failed to load some required data. Please try refreshing the page.",
-        );
-
-        // Safe fallbacks
-        setAllowedOwners([]);
-        setExistingComposers([]);
-        setArrangementTypes([]);
-        setExistingVendors([]);
-        setExistingTags([]);
+        // Default the owner selection
+        if (owners.length > 0) {
+          const selfOwner = owners.find((o) => o.ownerAccountId === user.accountId);
+          const defaultOwner = selfOwner || owners[0];
+          setOwner(String(defaultOwner.ownerAccountId));
+        }
+      } catch (err) {
+        console.error("Failed to load owners:", err);
       } finally {
-        setLoadingData(false);
+        setOwnersLoading(false);
       }
     };
 
-    fetchInitialData();
+    fetchOwners();
   }, [authLoading, user]);
+
+  // Show ref data error
+  useEffect(() => {
+    if (refDataError) setServerError(refDataError);
+  }, [refDataError]);
 
   // Redirect if not authenticated
   if (authLoading) return <div>Loading...</div>;
@@ -128,6 +106,8 @@ export default function AddNewScore() {
     navigate("/login");
     return null;
   }
+
+  const loadingData = refDataLoading || ownersLoading;
 
   const validateField = (name: string, value: string): string => {
     switch (name) {
@@ -142,15 +122,23 @@ export default function AddNewScore() {
     }
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-
+  const handleFieldChange = (name: string, value: string) => {
+    setFormFields((prev) => ({ ...prev, [name]: value }));
     if (touched[name]) {
       const error = validateField(name, value);
       setErrors((prev) => ({ ...prev, [name]: error }));
+    }
+  };
+
+  const handleVendorChange = (vendor: Vendor | null) => {
+    setFormFields((prev) => ({ ...prev, purchasedFrom: vendor }));
+  };
+
+  const handleOwnerChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setOwner(e.target.value);
+    if (touched.owner) {
+      const error = validateField("owner", e.target.value);
+      setErrors((prev) => ({ ...prev, owner: error }));
     }
   };
 
@@ -172,14 +160,11 @@ export default function AddNewScore() {
 
     // Final validation
     const newErrors: Record<string, string> = {};
-    if (!formData.scoreTitle.trim())
-      newErrors.scoreTitle = "Score title is required";
-    if (!formData.arrangementType)
-      newErrors.arrangementType = "Arrangement type is required";
-    if (!formData.owner) newErrors.owner = "Please select an owner";
+    if (!formFields.scoreTitle.trim()) newErrors.scoreTitle = "Score title is required";
+    if (!formFields.arrangementType) newErrors.arrangementType = "Arrangement type is required";
+    if (!owner) newErrors.owner = "Please select an owner";
 
     setErrors(newErrors);
-
     if (Object.keys(newErrors).length > 0) {
       setServerError("Please fix the errors above.");
       setIsLoading(false);
@@ -187,16 +172,14 @@ export default function AddNewScore() {
     }
 
     const payload: CreateScoreRequest = {
-      scoreTitle: formData.scoreTitle.trim(),
-      scoreSubtitle: formData.scoreSubtitle?.trim() || null,
-      owner: { accountId: parseInt(formData.owner) },
-      purchasedFrom: formData.purchasedFrom ? formData.purchasedFrom : null,
-      purchasedDate: formData.purchasedDate || null,
-      purchasedCost: formData.purchasedCost
-        ? parseFloat(formData.purchasedCost)
-        : null,
-      grade: formData.grade ? parseFloat(formData.grade) : null,
-      arrangementType: { code: formData.arrangementType },
+      scoreTitle: formFields.scoreTitle.trim(),
+      scoreSubtitle: formFields.scoreSubtitle?.trim() || null,
+      owner: { accountId: parseInt(owner) },
+      purchasedFrom: formFields.purchasedFrom || null,
+      purchasedDate: formFields.purchasedDate || null,
+      purchasedCost: formFields.purchasedCost ? parseFloat(formFields.purchasedCost) : null,
+      grade: formFields.grade ? parseFloat(formFields.grade) : null,
+      arrangementType: { code: formFields.arrangementType },
       scoreComposers: scoreComposers.map((c) => ({
         composer: { composerId: c.composerId! },
         contributionType: c.contributionType.trim(),
@@ -229,186 +212,62 @@ export default function AddNewScore() {
     }
   };
 
-  const handleNewVendorSuccess = (newVendor: Vendor) => {
-    setExistingVendors((prev) => [...prev, newVendor]);
-    setFormData((prev) => ({
-      ...prev,
-      purchasedFrom: newVendor,
-    }));
-    setShowVendorPopup(false);
-  };
-
   return (
     <div className="new-score-form">
-      <h1>Add a New Score</h1>
+      <PageTitle title="Add a New Score" />
 
       {serverError && <div className="server-error">{serverError}</div>}
       {successMessage && <div className="success">{successMessage}</div>}
 
       <form onSubmit={handleSubmit} noValidate>
-        <div className="form-group">
-          <label htmlFor="scoreTitle">Score Title*</label>
-          <input
-            type="text"
-            id="scoreTitle"
-            name="scoreTitle"
-            value={formData.scoreTitle}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            required
-          />
-          {touched.scoreTitle && errors.scoreTitle && (
-            <span className="error">{errors.scoreTitle}</span>
-          )}
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="scoreSubtitle">Score Subtitle</label>
-          <input
-            type="text"
-            id="scoreSubtitle"
-            name="scoreSubtitle"
-            value={formData.scoreSubtitle}
-            onChange={handleChange}
-            onBlur={handleBlur}
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="owner">Score Owner*</label>
-          <select
-            id="owner"
-            name="owner"
-            value={formData.owner}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            required
-            disabled={loadingData}
-          >
-            <option value="">Select owner...</option>
-            {allowedOwners.map((o) => (
-              <option key={o.ownerAccountId} value={o.ownerAccountId}>
-                {o.ownerAccountName}
-              </option>
-            ))}
-          </select>
-          {touched.owner && errors.owner && (
-            <span className="error">{errors.owner}</span>
-          )}
-          {loadingData && <small>Loading available owners...</small>}
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="purchasedFrom">Purchased From</label>
-          <select
-            id="purchasedFrom"
-            name="purchasedFrom"
-            value={formData.purchasedFrom?.vendorName || ""}
-            onChange={(e) => {
-              if (e.target.value === "new") {
-                setShowVendorPopup(true);
-              } else {
-                const selectedVendor = existingVendors.find(
-                  (v) => v.vendorName === e.target.value,
-                );
-                setFormData((prev) => ({
-                  ...prev,
-                  purchasedFrom: selectedVendor || null,
-                }));
-              }
-            }}
-          >
-            <option value="">— Select or create vendor —</option>
-            {existingVendors.map((v) => (
-              <option key={v.vendorId} value={v.vendorName}>
-                {v.vendorName}
-              </option>
-            ))}
-            <option value="new">+ Create new vendor</option>
-          </select>
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="purchasedDate">Purchased Date</label>
-          <input
-            type="date"
-            id="purchasedDate"
-            name="purchasedDate"
-            value={formData.purchasedDate || ""}
-            onChange={handleChange}
-            onBlur={handleBlur}
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="purchasedCost">Purchased Cost</label>
-          <input
-            type="number"
-            step="0.01"
-            id="purchasedCost"
-            name="purchasedCost"
-            value={formData.purchasedCost || ""}
-            onChange={handleChange}
-            onBlur={handleBlur}
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="grade">Grade</label>
-          <input
-            type="number"
-            step="0.5"
-            min="0"
-            max="10"
-            id="grade"
-            name="grade"
-            value={formData.grade || ""}
-            onChange={handleChange}
-            onBlur={handleBlur}
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="arrangementType">Arrangement Type*</label>
-          <select
-            id="arrangementType"
-            name="arrangementType"
-            value={formData.arrangementType}
-            onChange={handleChange}
-            required
-            disabled={loadingData}
-          >
-            <option value="">Select type...</option>
-            {arrangementTypes.map((t) => (
-              <option key={t.code} value={t.code}>
-                {t.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <ComposerList
-          composers={scoreComposers}
-          setComposers={setScoreComposers}
+        <ScoreForm
+          fields={formFields}
+          onFieldChange={handleFieldChange}
+          onVendorChange={handleVendorChange}
+          arrangementTypes={arrangementTypes}
           existingComposers={existingComposers}
           setExistingComposers={setExistingComposers}
-        />
-
-        <PartList parts={parts} setParts={setParts} />
-
-        <TagsList
-          tags={scoreTags}
-          setTags={setScoreTags}
+          existingVendors={existingVendors}
+          setExistingVendors={setExistingVendors}
           existingTags={existingTags}
           setExistingTags={setExistingTags}
-        />
-
-        <MedleyList
+          composers={scoreComposers}
+          setComposers={setScoreComposers}
+          parts={parts}
+          setParts={setParts}
+          scoreTags={scoreTags}
+          setScoreTags={setScoreTags}
           medleys={medleys}
           setMedleys={setMedleys}
-          existingComposers={existingComposers}
-          setExistingComposers={setExistingComposers}
-        />
+          errors={errors}
+          touched={touched}
+          onBlur={handleBlur}
+          loadingData={loadingData}
+        >
+          {/* Owner selector — only on Add page */}
+          <div className="form-group">
+            <label htmlFor="owner">Score Owner*</label>
+            <select
+              id="owner"
+              name="owner"
+              value={owner}
+              onChange={handleOwnerChange}
+              onBlur={handleBlur}
+              required
+              disabled={loadingData}
+            >
+              <option value="">Select owner...</option>
+              {allowedOwners.map((o) => (
+                <option key={o.ownerAccountId} value={o.ownerAccountId}>
+                  {o.ownerAccountName}
+                </option>
+              ))}
+            </select>
+            {touched.owner && errors.owner && (
+              <span className="error">{errors.owner}</span>
+            )}
+          </div>
+        </ScoreForm>
 
         <button
           type="button"
@@ -419,12 +278,6 @@ export default function AddNewScore() {
           {isLoading ? "Adding Score..." : "Save Score"}
         </button>
       </form>
-
-      <AddEditVendorPopup
-        open={showVendorPopup}
-        onClose={() => setShowVendorPopup(false)}
-        onSuccess={handleNewVendorSuccess}
-      />
     </div>
   );
 }

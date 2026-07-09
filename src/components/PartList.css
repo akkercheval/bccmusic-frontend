@@ -17,6 +17,7 @@
   grid-template-columns: 4fr 1fr 0.5fr; /* More space for details, then edit/remove */
   gap: 0.5rem;
   margin-bottom: 1rem;
+  margin-left: 1.5rem;
   padding: 1rem;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 8px;
@@ -26,6 +27,7 @@
 .part-details {
   color: white;
   font-size: 1rem;
+  text-align: left;
 }
 
 .add-btn {
@@ -58,7 +60,7 @@
 }
 
 .remove-btn {
-  background: #ff6b6b;
+  background: var(--accent-red);
   color: white;
   border: none;
   padding: 0.5rem 0.75rem;
@@ -69,5 +71,5 @@
 }
 
 .remove-btn:hover {
-  background: #ff5252;
+  background: var(--hover-red);
 }

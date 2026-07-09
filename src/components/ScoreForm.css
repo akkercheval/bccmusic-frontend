@@ -1,0 +1,59 @@
+/* ─── Score Form Shared Styles ────────────────────────────────────────────── */
+
+.score-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.score-form-fields .form-group {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1rem;
+  align-items: center;
+  margin: 0.75rem 0;
+}
+
+.score-form-fields label {
+  font-weight: 500;
+  color: var(--text-light);
+  text-align: right;
+  padding-right: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.score-form-fields input,
+.score-form-fields select {
+  width: 90%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background-color: var(--input-bg);
+  color: var(--text-light);
+  font-size: 1rem;
+  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.score-form-fields input:focus,
+.score-form-fields select:focus {
+  outline: none;
+  border-color: var(--primary-yellow);
+  box-shadow: 0 0 0 3px rgba(255, 221, 68, 0.25);
+}
+
+@media (max-width: 600px) {
+  .score-form-fields .form-group {
+    grid-template-columns: 1fr;
+  }
+
+  .score-form-fields label {
+    text-align: left;
+    padding-right: 0;
+  }
+
+  .score-form-fields input,
+  .score-form-fields select {
+    width: 100%;
+  }
+}

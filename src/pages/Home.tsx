@@ -1,11 +1,12 @@
 import AccountButtons from "../components/AccountButtons";
+import PageTitle from "../components/PageTitle";
 import "./Home.css";
 
 export default function Home() {
   return (
     <div className="welcome-container">
       <div className="welcome-text">
-        <h1>Welcome!</h1>
+        <PageTitle title="Welcome!" />
         <p>
           BCCMusic exists to catalog music for easy searching. Anyone can create
           a new account, which will be set up as a Viewer by default.

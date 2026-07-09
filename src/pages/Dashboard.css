@@ -1,25 +1,174 @@
-.link-button {
-  font-family: Playfair, Georgia, 'Times New Roman', Times, serif;
-  width: 100%;
-  background-color: var(--primary-yellow);
-  color: var(--primary-blue);
-  border: none;
-  border-radius: 10px;
-  padding: 1rem;
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-top: 12px;
+/* ─── Dashboard Container ─────────────────────────────────────────────────── */
+
+.dashboard-container {
+  background-color: var(--primary-blue);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  padding: 2rem 2.5rem;
+  width: calc(100% - 5rem);
+  margin: 1rem auto;
+  color: white;
   text-align: center;
+}
+
+/* ─── Greeting Section ────────────────────────────────────────────────────── */
+
+.dashboard-greeting {
+  margin-bottom: 2rem;
+}
+
+.dashboard-user-name {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--text-light);
+  margin: 0.5rem 0 0.25rem;
+}
+
+.dashboard-account-type {
+  font-size: 1rem;
+  color: var(--primary-yellow);
+  opacity: 0.8;
+  margin: 0;
+  text-transform: capitalize;
+  letter-spacing: 0.05em;
+}
+
+/* ─── Navigation Grid ─────────────────────────────────────────────────────── */
+
+.dashboard-nav {
+  margin: 1.5rem 0;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* ─── Individual Cards ────────────────────────────────────────────────────── */
+
+.dashboard-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.75rem 1.25rem;
+  background-color: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 221, 68, 0.15);
+  border-radius: 12px;
   cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  font-family: inherit;
+  color: white;
+}
+
+.dashboard-card:hover {
+  background-color: rgba(255, 221, 68, 0.1);
+  border-color: var(--primary-yellow);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(255, 221, 68, 0.15);
+}
+
+.dashboard-card:focus-visible {
+  outline: 3px solid var(--primary-yellow);
+  outline-offset: 3px;
+}
+
+.dashboard-card:active {
+  transform: translateY(-1px);
+}
+
+.dashboard-card-icon {
+  font-size: 2.4rem;
+  line-height: 1;
+  color: var(--primary-yellow);
+}
+
+.dashboard-card-label {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--primary-yellow);
+}
+
+.dashboard-card-desc {
+  font-size: 0.95rem;
+  color: var(--text-light);
+  opacity: 0.75;
+  line-height: 1.4;
+}
+
+/* ─── Footer / Logout ─────────────────────────────────────────────────────── */
+
+.dashboard-footer {
+  margin-top: 2rem;
+}
+
+.dashboard-logout {
+  font-family: inherit;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-light);
+  padding: 0.6rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  opacity: 0.6;
   transition: all 0.2s ease;
 }
 
-.link-button:hover:not(:disabled) {
-  background-color: var(--hover-yellow);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+.dashboard-logout:hover {
+  opacity: 1;
+  border-color: var(--accent-red);
+  color: var(--accent-red);
 }
 
-.dashboard-card {
-  max-width: 500px;
+.dashboard-logout:focus-visible {
+  outline: 3px solid var(--primary-yellow);
+  outline-offset: 3px;
+}
+
+/* ─── Decorative Staff ────────────────────────────────────────────────────── */
+
+.dashboard-staff {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 1.5rem 0 0.5rem;
+  opacity: 0.2;
+}
+
+.dashboard-staff span {
+  display: block;
+  height: 2px;
+  background-color: var(--text-light);
+  border-radius: 1px;
+}
+
+/* ─── Responsive ──────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 1.5rem 1rem;
+    width: calc(100% - 1rem);
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .dashboard-user-name {
+    font-size: 1.3rem;
+  }
+}
+
+/* ─── Reduced motion ──────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-card:hover {
+    transform: none;
+  }
 }

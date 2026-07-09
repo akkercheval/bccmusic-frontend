@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../services/api"; // ← import your axios instance
+import api from "../services/api";
+import PageTitle from "../components/PageTitle";
 import "./Register.css";
 
 const states = [
@@ -261,7 +262,7 @@ export default function Register() {
 
   return (
     <div className="registration-form">
-      <h1>Create a New Account</h1>
+      <PageTitle title="Create a New Account" />
 
       {serverError && <div className="error server-error">{serverError}</div>}
       {errors.general && <div className="error server-error">{errors.general}</div>}

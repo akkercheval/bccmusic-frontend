@@ -109,7 +109,7 @@ button[type="submit"]:active {
 }
 
 .error {
-  color: #ff6b6b;
+  color: var(--accent-red);
   font-size: 0.9rem;
   margin-bottom: 0.25rem;
   margin-left: 10px;
@@ -121,7 +121,7 @@ button[type="submit"]:active {
 /* Optional: highlight invalid fields */
 input:invalid:focus,
 select:invalid:focus {
-  border-color: #ff6b6b;
+  border-color: var(--accent-red);
   box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.25);
 }
 
@@ -135,7 +135,7 @@ select:invalid:focus {
 }
 
 .server-error {
-  color: #ff6b6b;
+  color: var(--accent-red);
   background-color: rgba(255, 107, 107, 0.15);
   padding: 1rem;
   border-radius: 8px;
