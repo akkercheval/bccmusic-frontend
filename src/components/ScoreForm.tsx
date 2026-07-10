@@ -3,12 +3,14 @@ import ComposerList from "./ComposerList";
 import PartList from "./PartList";
 import TagsList from "./TagsList";
 import MedleyList from "./MedleyList";
+import CommentList from "./CommentList";
 import AddEditVendorPopup from "./AddEditVendorPopup";
 import type {
   Part,
   ComposerEntry,
   MedleyEntry,
   ScoreTag,
+  ScoreComment,
   Vendor,
 } from "../types/score";
 import "./ScoreForm.css";
@@ -52,6 +54,14 @@ interface ScoreFormProps {
   medleys: MedleyEntry[];
   setMedleys: React.Dispatch<React.SetStateAction<MedleyEntry[]>>;
 
+  /** Comments (optional — not all callers need this) */
+  comments?: ScoreComment[];
+  setComments?: React.Dispatch<React.SetStateAction<ScoreComment[]>>;
+  /** Current user's account ID for comment permissions */
+  currentUserId?: number;
+  /** Comment permission level */
+  commentPermission?: "full" | "limited" | "readonly";
+
   /** Field validation errors (keyed by field name) */
   errors?: Record<string, string>;
   /** Which fields have been touched/blurred */
@@ -87,6 +97,10 @@ export default function ScoreForm({
   setScoreTags,
   medleys,
   setMedleys,
+  comments,
+  setComments,
+  currentUserId,
+  commentPermission = "full",
   errors = {},
   touched = {},
   onBlur,
@@ -260,6 +274,16 @@ export default function ScoreForm({
         existingComposers={existingComposers}
         setExistingComposers={setExistingComposers}
       />
+
+      {/* Comments */}
+      {comments && setComments && currentUserId && (
+        <CommentList
+          comments={comments}
+          setComments={setComments}
+          currentUserId={currentUserId}
+          permissionLevel={commentPermission}
+        />
+      )}
 
       {/* Vendor popup */}
       <AddEditVendorPopup

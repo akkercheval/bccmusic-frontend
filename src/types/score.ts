@@ -88,6 +88,21 @@ export interface ComposerEntry {
   contributionType: string;
 }
 
+// Score Comment
+export interface ScoreComment {
+  commentId?: number;
+  scoreId?: number;
+  comment: string;
+  createdByAccountId?: number;
+  createdByAccountName?: string;
+  createdByUsername?: string;
+  createdAt?: string;
+  updatedByAccountId?: number;
+  updatedByAccountName?: string;
+  updatedByUsername?: string;
+  updatedAt?: string;
+}
+
 // Main Score shapes
 
 // Full response from GET /scores/{id} or similar (backend MusicScore)
@@ -108,6 +123,7 @@ export interface MusicScore {
   parts: Part[];
   scoreTags: ScoreTag[];
   medleys: Medley[];            // nested composer from backend
+  comments: ScoreComment[];
   updatedAt: string;
   updatedBy: {
     accountId: number;
@@ -135,4 +151,5 @@ export interface CreateScoreRequest {
     pieceTitle: string;
     composer: { composerId: number } | null;
   }[];
+  comments?: { comment: string }[];
 }

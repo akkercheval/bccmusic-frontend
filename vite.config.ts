@@ -50,6 +50,10 @@ export default defineConfig({
         target: 'http://localhost:8080',
         changeOrigin: true,
       },
+      '/account-upgrade-requests': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
     },
   },
 

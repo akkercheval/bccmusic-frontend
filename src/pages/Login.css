@@ -1,3 +1,20 @@
+/* ─── Login Container Override ────────────────────────────────────────────── */
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.login-container .page-card {
+  width: 100%;
+  max-width: 500px;
+}
+
+/* ─── Subtitle ───────────────────────────────────────────────────────────── */
+
 .login-subtitle {
   font-size: 1.1rem;
   color: var(--text-light);

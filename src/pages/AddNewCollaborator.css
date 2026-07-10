@@ -1,15 +1,108 @@
-.new-collaborator-form {
-  text-align: left;
-  width: 100%;
-  max-width: 800px; 
-  margin: 2rem auto;
-  padding: 2rem;
+/* ─── Add New Collaborator Page ───────────────────────────────────────────── */
+
+.add-collab-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 1rem 2rem;
+}
+
+.add-collab-card {
   background-color: var(--primary-blue);
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  padding: 2.5rem 2.5rem;
+  width: 100%;
   color: white;
-  min-height: 80vh; 
+  text-align: left;
+}
+
+/* ─── Subtitle ───────────────────────────────────────────────────────────── */
+
+.add-collab-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-light);
+  text-align: center;
+  margin: 0 0 1rem;
+  opacity: 0.85;
+}
+
+/* ─── Staff Line Accents ─────────────────────────────────────────────────── */
+
+.add-collab-staff {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 5px;
+  padding: 1rem 0;
+  opacity: 0.2;
+}
+
+.add-collab-staff span {
+  display: block;
+  height: 2px;
+  background-color: var(--text-light);
+  border-radius: 1px;
+}
+
+/* ─── Form Layout ────────────────────────────────────────────────────────── */
+
+.add-collab-card .form-group {
+  max-width: 700px;
+}
+
+.add-collab-card .primary-button {
+  display: block;
+  margin: 2rem auto 0;
+  max-width: 280px;
+}
+
+.add-collab-card .primary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ─── Footer / Back Link ─────────────────────────────────────────────────── */
+
+.add-collab-footer {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.add-collab-back-link {
+  display: inline-block;
+  font-family: inherit;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--primary-yellow);
+  text-decoration: none;
+  padding: 0.6rem 1.5rem;
+  border: 1px solid rgba(255, 221, 68, 0.3);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.add-collab-back-link:hover {
+  background-color: rgba(255, 221, 68, 0.1);
+  border-color: var(--primary-yellow);
+  transform: translateY(-2px);
+}
+
+.add-collab-back-link:focus-visible {
+  outline: 3px solid var(--primary-yellow);
+  outline-offset: 3px;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .add-collab-container {
+    padding: 0.5rem;
+  }
+
+  .add-collab-card {
+    padding: 1.5rem 1rem;
+    border-radius: 12px;
+  }
 }

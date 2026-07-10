@@ -1,25 +1,21 @@
-import React from "react";
-import "./AccountButtons.css";
 import { Link } from "react-router-dom";
+import "./AccountButtons.css";
 
-const AccountButtons: React.FC = () => {
+export default function AccountButtons() {
   return (
     <div className="account-buttons">
-      <Link to="/login">
-        <button
-          className="account-button"
-          aria-label="Login to existing account"
-        >
+      {/* CSS staff lines behind buttons */}
+      <div className="account-buttons-staff" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <div className="account-buttons-content">
+        <Link to="/login" className="account-button" aria-label="Login to existing account">
           Login With Existing Account
-        </button>
-      </Link>
-      <Link to="/register">
-        <button className="account-button" aria-label="Create a new account">
+        </Link>
+        <Link to="/register" className="account-button" aria-label="Create a new account">
           Create a New Account
-        </button>
-      </Link>
+        </Link>
+      </div>
     </div>
   );
-};
-
-export default AccountButtons;
+}

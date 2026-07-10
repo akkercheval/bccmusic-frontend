@@ -1,0 +1,249 @@
+/* ─── My Account Page ─────────────────────────────────────────────────────── */
+
+.myaccount-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 1rem 2rem;
+}
+
+.myaccount-card {
+  background-color: var(--primary-blue);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  padding: 2.5rem 2.5rem;
+  width: 100%;
+  color: white;
+  text-align: left;
+}
+
+/* ─── Role Badge & Username ──────────────────────────────────────────────── */
+
+.myaccount-role-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: 0.5rem 0 1rem;
+}
+
+.role-badge {
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 0.35rem 1rem;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.role-badge--viewer {
+  background-color: rgba(224, 224, 255, 0.15);
+  color: var(--text-light);
+  border: 1px solid rgba(224, 224, 255, 0.3);
+}
+
+.role-badge--owner {
+  background-color: rgba(255, 221, 68, 0.15);
+  color: var(--primary-yellow);
+  border: 1px solid rgba(255, 221, 68, 0.4);
+}
+
+.role-badge--collaborator {
+  background-color: rgba(76, 175, 80, 0.15);
+  color: #81c784;
+  border: 1px solid rgba(76, 175, 80, 0.4);
+}
+
+.role-badge--admin {
+  background-color: rgba(255, 123, 123, 0.15);
+  color: var(--accent-red);
+  border: 1px solid rgba(255, 123, 123, 0.4);
+}
+
+.myaccount-username {
+  font-size: 1.1rem;
+  color: var(--text-light);
+  opacity: 0.7;
+}
+
+/* ─── Staff Line Accents ─────────────────────────────────────────────────── */
+
+.myaccount-staff {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 1rem 0;
+  opacity: 0.2;
+}
+
+.myaccount-staff span {
+  display: block;
+  height: 2px;
+  background-color: var(--text-light);
+  border-radius: 1px;
+}
+
+/* ─── Details (View Mode) ────────────────────────────────────────────────── */
+
+.myaccount-details {
+  max-width: 700px;
+  margin: 1rem 0;
+}
+
+.myaccount-detail-row {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid rgba(255, 221, 68, 0.06);
+}
+
+.myaccount-detail-row:last-child {
+  border-bottom: none;
+}
+
+.myaccount-detail-row--muted {
+  opacity: 0.6;
+  margin-top: 0.5rem;
+}
+
+.myaccount-label {
+  color: var(--primary-yellow);
+  font-weight: 600;
+  font-size: 1rem;
+  min-width: 140px;
+  white-space: nowrap;
+}
+
+.myaccount-value {
+  color: var(--text-light);
+  font-size: 1.05rem;
+}
+
+/* ─── Form Layout ────────────────────────────────────────────────────────── */
+
+.myaccount-card .form-group {
+  max-width: 700px;
+}
+
+/* ─── Actions ────────────────────────────────────────────────────────────── */
+
+.myaccount-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+  max-width: 700px;
+}
+
+.myaccount-actions .primary-button {
+  margin-top: 0;
+}
+
+.myaccount-actions .primary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ─── Sections ───────────────────────────────────────────────────────────── */
+
+.myaccount-section {
+  margin: 1rem 0;
+}
+
+.myaccount-section-title {
+  font-size: 1.4rem;
+  color: var(--primary-yellow);
+  margin: 0 0 1rem;
+  text-align: left;
+}
+
+.myaccount-upgrade-desc {
+  font-size: 1rem;
+  color: var(--text-light);
+  opacity: 0.8;
+  margin: 0 0 1rem;
+  max-width: 600px;
+}
+
+/* ─── Loading State ──────────────────────────────────────────────────────── */
+
+.myaccount-loading {
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.myaccount-loading p {
+  color: var(--text-light);
+  font-size: 1.3rem;
+  margin: 1rem 0 0;
+}
+
+.myaccount-loading-notes {
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+}
+
+.myaccount-loading-notes .loading-note {
+  font-size: 2.2rem;
+  color: var(--primary-yellow);
+  animation: myaccount-bounce 1.4s ease-in-out infinite;
+}
+
+.myaccount-loading-notes .loading-note:nth-child(1) { animation-delay: 0s; }
+.myaccount-loading-notes .loading-note:nth-child(2) { animation-delay: 0.15s; }
+.myaccount-loading-notes .loading-note:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes myaccount-bounce {
+  0%, 80%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  40% {
+    transform: translateY(-12px);
+    opacity: 1;
+  }
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .myaccount-container {
+    padding: 0.5rem;
+  }
+
+  .myaccount-card {
+    padding: 1.5rem 1rem;
+    border-radius: 12px;
+  }
+
+  .myaccount-detail-row {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .myaccount-label {
+    min-width: unset;
+  }
+
+  .myaccount-role-section {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .myaccount-actions {
+    flex-direction: column;
+  }
+}
+
+/* ─── Reduced Motion ─────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .myaccount-loading-notes .loading-note {
+    animation: none;
+    opacity: 1;
+  }
+}

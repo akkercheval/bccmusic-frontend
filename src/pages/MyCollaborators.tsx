@@ -28,32 +28,11 @@ interface Collaborator {
   permissionLevel: string;
 }
 
-const columns = [
-  {
-    name: "Collaborator",
-    selector: (row: Collaborator) =>
-      row.collaborator?.accountName || row.collaborator?.username,
-  },
-  {
-    name: "Granted By",
-    selector: (row: Collaborator) =>
-      row.grantedBy?.accountName || row.grantedBy?.username,
-  },
-  {
-    name: "Granted At",
-    selector: (row: Collaborator) => row.grantedAt,
-  },
-  {
-    name: "Permission Level",
-    selector: (row: Collaborator) => row.permissionLevel,
-  },
-];
-
 export default function MyCollaborators() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
-  const [isloading, setisLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -70,39 +49,97 @@ export default function MyCollaborators() {
         const response = await api.get("/collaborators");
         setCollaborators(response.data);
       } catch (err: unknown) {
-        setError(
-          extractErrorMessage(err, "Failed to load your collaborators"),
-        );
-        console.error("Error fetching collaborators:", err);
+        setError(extractErrorMessage(err, "Failed to load your collaborators"));
       } finally {
-        setisLoading(false);
+        setIsLoading(false);
       }
     };
 
     fetchMyCollaborators();
   }, [user]);
 
+  const columns = [
+    {
+      name: "Collaborator",
+      selector: (row: Collaborator) =>
+        row.collaborator?.accountName || row.collaborator?.username,
+      sortable: true,
+      grow: 2,
+    },
+    {
+      name: "Permission",
+      selector: (row: Collaborator) => row.permissionLevel,
+      sortable: true,
+    },
+    {
+      name: "Granted By",
+      selector: (row: Collaborator) =>
+        row.grantedBy?.accountName || row.grantedBy?.username,
+      sortable: true,
+      hide: 768 as const,
+    },
+    {
+      name: "Granted At",
+      selector: (row: Collaborator) => row.grantedAt,
+      sortable: true,
+      hide: 768 as const,
+      cell: (row: Collaborator) =>
+        row.grantedAt ? new Date(row.grantedAt).toLocaleDateString() : "—",
+    },
+  ];
+
   if (loading) return <div className="loading">Loading...</div>;
   if (!user) return null;
-  if (isloading)
-    return <div className="loading">Loading your Collaborators...</div>;
-  if (error) return <div className="error-message">{error}</div>;
 
   return (
-    <div className="my-collaborators-container">
+    <div className="collaborators-container">
       <PageTitle title="My Collaborators" />
-      <p>
-        Logged in as: <strong>{user.accountName}</strong>
+      <p className="collaborators-subtitle">
+        Managing collaborators for <strong>{user.accountName}</strong>
       </p>
-      <button
-        onClick={() => navigate("/add-collaborator")}
-        className="primary-button"
-      >
-        Add a New Collaborator
-      </button>
-      {collaborators.length === 0 ? (
-        <p>You don't have any collaborators yet.</p>
-      ) : (
+
+      <div className="collaborators-actions">
+        <button
+          onClick={() => navigate("/add-collaborator")}
+          className="primary-button"
+        >
+          ➕ Add a New Collaborator
+        </button>
+      </div>
+
+      {/* Loading state */}
+      {isLoading && (
+        <div className="collaborators-loading">
+          <div className="collaborators-loading-notes">
+            <span className="loading-note">♩</span>
+            <span className="loading-note">♪</span>
+            <span className="loading-note">♫</span>
+            <span className="loading-note">♬</span>
+            <span className="loading-note">♩</span>
+          </div>
+          <p>Loading your collaborators...</p>
+        </div>
+      )}
+
+      {/* Error state */}
+      {!isLoading && error && (
+        <div className="collaborators-error">
+          <span className="collaborators-error-icon">𝄞</span>
+          <p>{error}</p>
+        </div>
+      )}
+
+      {/* Empty state */}
+      {!isLoading && !error && collaborators.length === 0 && (
+        <div className="collaborators-empty">
+          <span className="collaborators-empty-icon">𝄻</span>
+          <p>You don't have any collaborators yet.</p>
+          <p>Add one to get started sharing your music collection.</p>
+        </div>
+      )}
+
+      {/* Data table */}
+      {!isLoading && !error && collaborators.length > 0 && (
         <DataTable
           columns={columns}
           data={collaborators}
@@ -111,15 +148,11 @@ export default function MyCollaborators() {
           pointerOnHover
           defaultSortFieldId={1}
           theme="dark"
-          customStyles={tableCustomStyles}
+          onRowClicked={(row) =>
+            navigate(`/collaborators/${row.collaboratorId}`)
+          }
         />
       )}
     </div>
   );
 }
-
-const tableCustomStyles = {
-  headRow: { style: { backgroundColor: "#101585", color: "#FFDD44" } },
-  rows: { style: { backgroundColor: "#1e1e4d", color: "white" } },
-  pagination: { style: { backgroundColor: "#101585", color: "white" } },
-};

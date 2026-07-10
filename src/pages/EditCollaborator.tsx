@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 import { extractErrorMessage } from "../utils/errorUtils";
 import PageTitle from "../components/PageTitle";
+import "./EditCollaborator.css";
 
 export default function EditCollaborator() {
   const { collaboratorId } = useParams<{ collaboratorId: string }>();
@@ -13,8 +14,11 @@ export default function EditCollaborator() {
   const [collaborator, setCollaborator] = useState<any>(null);
   const [permissionLevel, setPermissionLevel] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Load collaborator details + permission check
   useEffect(() => {
@@ -60,8 +64,9 @@ export default function EditCollaborator() {
   const handleSave = async () => {
     if (!collaborator) return;
 
-    setIsLoading(true);
+    setIsSaving(true);
     setError(null);
+    setSuccessMessage(null);
 
     try {
       await api.put(`/collaborators/${collaboratorId}`, {
@@ -75,55 +80,97 @@ export default function EditCollaborator() {
     } catch (err: unknown) {
       setError(extractErrorMessage(err, "Failed to update collaboration."));
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!confirm("Are you sure you want to remove this collaborator?")) return;
+    setIsDeleting(true);
+    setError(null);
+    setSuccessMessage(null);
 
     try {
       await api.delete(`/collaborators/${collaboratorId}`);
-      setSuccessMessage("Collaborator removed successfully.");
+      setSuccessMessage("Collaborator removed successfully. Redirecting...");
+      setShowDeleteConfirm(false);
       setTimeout(() => navigate("/my-collaborators"), 1500);
     } catch (err: unknown) {
       setError(extractErrorMessage(err, "Failed to delete collaborator."));
+      setShowDeleteConfirm(false);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
-  if (isLoading) return <div className="loading">Loading collaboration...</div>;
-
-  if (error) {
+  if (isLoading) {
     return (
-      <div className="page-container">
-        <div className="page-card">
+      <div className="edit-collab-container">
+        <div className="edit-collab-card">
+          <div className="edit-collab-loading">
+            <div className="edit-collab-loading-notes">
+              <span className="loading-note">♩</span>
+              <span className="loading-note">♪</span>
+              <span className="loading-note">♫</span>
+            </div>
+            <p>Loading collaboration...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !collaborator) {
+    return (
+      <div className="edit-collab-container">
+        <div className="edit-collab-card">
           <PageTitle title="Access Denied" />
-          <p className="server-error">{error}</p>
-          <button
-            onClick={() => navigate("/my-collaborators")}
-            className="primary-button"
-          >
-            ← Back to My Collaborators
-          </button>
+          <div className="server-error">{error}</div>
+          <div className="edit-collab-footer">
+            <Link to="/my-collaborators" className="edit-collab-back-link">
+              ← Back to My Collaborators
+            </Link>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="page-container">
-      <div className="page-card">
+    <div className="edit-collab-container">
+      <div className="edit-collab-card">
         <PageTitle title="Edit Collaboration" />
+        <p className="edit-collab-subtitle">
+          Update permissions for this collaborator.
+        </p>
 
-        {successMessage && <div className="success">{successMessage}</div>}
-
-        <div className="form-group">
-          <label>Collaborator:</label>
-          <p>
-            <strong>{collaborator?.collaborator?.accountName}</strong>
-          </p>
+        {/* Staff line accent */}
+        <div className="edit-collab-staff" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span>
         </div>
 
+        {/* Feedback messages */}
+        {error && <div className="server-error">{error}</div>}
+        {successMessage && <div className="success">{successMessage}</div>}
+
+        {/* Collaborator info */}
+        <div className="edit-collab-info">
+          <div className="edit-collab-info-item">
+            <span className="edit-collab-info-label">Collaborator:</span>
+            <span className="edit-collab-info-value">
+              {collaborator?.collaborator?.accountName}
+            </span>
+          </div>
+          {collaborator?.grantedAt && (
+            <div className="edit-collab-info-item">
+              <span className="edit-collab-info-label">Granted:</span>
+              <span className="edit-collab-info-value">
+                {new Date(collaborator.grantedAt).toLocaleDateString()}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Permission form */}
         <div className="form-group">
           <label htmlFor="permission-select">Permission Level:</label>
           <select
@@ -132,30 +179,67 @@ export default function EditCollaborator() {
             onChange={(e) => setPermissionLevel(e.target.value)}
           >
             <option value="VIEW_ONLY">View Scores Only</option>
-            <option value="LIMITED_SCORE_EDIT">
-              Limited Add and Edit Scores
-            </option>
+            <option value="LIMITED_SCORE_EDIT">Limited Add and Edit Scores</option>
             <option value="FULL_SCORE_EDIT">Full Edit Scores</option>
             <option value="SCORE_COLLAB_EDIT">Full Collaboration</option>
           </select>
         </div>
 
-        <div style={{ marginTop: "2rem" }}>
+        {/* Action buttons */}
+        <div className="edit-collab-actions">
           <button
             onClick={handleSave}
             className="primary-button"
-            disabled={isLoading}
+            disabled={isSaving}
           >
-            {isLoading ? "Saving..." : "💾 Save Changes"}
+            {isSaving ? "Saving..." : "💾 Save Changes"}
           </button>
-
           <button
-            onClick={handleDelete}
-            className="secondary-button"
-            style={{ marginLeft: "1rem", background: "#ff6b6b" }}
+            onClick={() => setShowDeleteConfirm(true)}
+            className="primary-button danger"
+            disabled={showDeleteConfirm}
           >
             🗑️ Remove Collaborator
           </button>
+        </div>
+
+        {/* Inline delete confirmation */}
+        {showDeleteConfirm && (
+          <div className="edit-collab-delete-confirm" role="alertdialog" aria-labelledby="delete-collab-title">
+            <p id="delete-collab-title" className="edit-collab-delete-message">
+              🗑️ Remove this collaborator? They will lose access to your collection.
+            </p>
+            <div className="edit-collab-delete-actions">
+              <button
+                type="button"
+                className="primary-button danger"
+                onClick={handleDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Removing..." : "Yes, Remove"}
+              </button>
+              <button
+                type="button"
+                className="primary-button"
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Staff line accent */}
+        <div className="edit-collab-staff" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+
+        {/* Back link */}
+        <div className="edit-collab-footer">
+          <Link to="/my-collaborators" className="edit-collab-back-link">
+            ← Back to My Collaborators
+          </Link>
         </div>
       </div>
     </div>

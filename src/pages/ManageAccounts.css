@@ -1,0 +1,414 @@
+/* ─── Manage Accounts Page ────────────────────────────────────────────────── */
+
+.manage-accounts-container {
+  background-color: var(--primary-blue);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  padding: 2rem 2.5rem;
+  width: calc(100% - 5rem);
+  margin: 1rem auto;
+  color: white;
+  text-align: center;
+}
+
+/* ─── Section Titles ─────────────────────────────────────────────────────── */
+
+.manage-section-title {
+  font-size: 1.4rem;
+  color: var(--primary-yellow);
+  margin: 0 0 1rem;
+  text-align: left;
+}
+
+/* ─── Staff Divider ──────────────────────────────────────────────────────── */
+
+.manage-staff {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 1.25rem 0;
+  opacity: 0.2;
+}
+
+.manage-staff span {
+  display: block;
+  height: 2px;
+  background-color: var(--text-light);
+  border-radius: 1px;
+}
+
+/* ─── Search ─────────────────────────────────────────────────────────────── */
+
+.manage-search {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+  max-width: 500px;
+}
+
+.manage-search label {
+  color: var(--text-light);
+  white-space: nowrap;
+  font-size: 1.1rem;
+}
+
+.manage-search input {
+  flex: 1;
+  padding: 0.65rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background-color: var(--input-bg);
+  color: var(--text-light);
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.manage-search input:focus {
+  outline: none;
+  border-color: var(--primary-yellow);
+  box-shadow: 0 0 0 3px rgba(255, 221, 68, 0.25);
+}
+
+.manage-search input::placeholder {
+  color: #888;
+}
+
+/* ─── Role Badge (reused from MyAccount) ─────────────────────────────────── */
+
+.role-badge {
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.role-badge--viewer {
+  background-color: rgba(224, 224, 255, 0.15);
+  color: var(--text-light);
+  border: 1px solid rgba(224, 224, 255, 0.3);
+}
+
+.role-badge--owner {
+  background-color: rgba(255, 221, 68, 0.15);
+  color: var(--primary-yellow);
+  border: 1px solid rgba(255, 221, 68, 0.4);
+}
+
+.role-badge--collaborator {
+  background-color: rgba(76, 175, 80, 0.15);
+  color: #81c784;
+  border: 1px solid rgba(76, 175, 80, 0.4);
+}
+
+.role-badge--admin {
+  background-color: rgba(255, 123, 123, 0.15);
+  color: var(--accent-red);
+  border: 1px solid rgba(255, 123, 123, 0.4);
+}
+
+/* ─── Change Role Button ─────────────────────────────────────────────────── */
+
+.manage-role-btn {
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 221, 68, 0.3);
+  background: none;
+  color: var(--primary-yellow);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.manage-role-btn:hover:not(:disabled) {
+  background-color: rgba(255, 221, 68, 0.1);
+  border-color: var(--primary-yellow);
+}
+
+.manage-role-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ─── Role Change Dialog ─────────────────────────────────────────────────── */
+
+.manage-role-change {
+  background-color: rgba(255, 221, 68, 0.05);
+  border: 1px solid rgba(255, 221, 68, 0.2);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+  text-align: left;
+  max-width: 500px;
+  animation: manage-slide-in 0.3s ease-out;
+}
+
+@keyframes manage-slide-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.manage-role-change-title {
+  font-size: 1.2rem;
+  color: var(--primary-yellow);
+  margin: 0 0 0.75rem;
+}
+
+.manage-role-change-current {
+  font-size: 1rem;
+  color: var(--text-light);
+  margin: 0 0 1rem;
+}
+
+.manage-role-change .form-group {
+  max-width: 400px;
+}
+
+.manage-role-change-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.manage-role-change-actions .primary-button {
+  margin-top: 0;
+  font-size: 0.95rem;
+  padding: 0.6rem 1.25rem;
+}
+
+.manage-role-change-actions .primary-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ─── Upgrade Requests Section ───────────────────────────────────────────── */
+
+.manage-upgrade-section {
+  text-align: left;
+  margin-bottom: 1rem;
+}
+
+.manage-upgrade-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.manage-upgrade-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background-color: rgba(255, 221, 68, 0.05);
+  border: 1px solid rgba(255, 221, 68, 0.15);
+  border-radius: 8px;
+}
+
+.manage-upgrade-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.manage-upgrade-info strong {
+  color: var(--text-light);
+  font-size: 1.05rem;
+}
+
+.manage-upgrade-date {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  opacity: 0.6;
+}
+
+.manage-upgrade-reason {
+  font-size: 0.95rem;
+  color: var(--text-light);
+  opacity: 0.8;
+  font-style: italic;
+  margin: 0.25rem 0 0;
+}
+
+.manage-upgrade-actions .primary-button {
+  margin-top: 0;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+}
+
+/* Resolve form (inline) */
+.manage-resolve-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.manage-resolve-input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background-color: var(--input-bg);
+  color: var(--text-light);
+  font-size: 0.9rem;
+  width: 250px;
+}
+
+.manage-resolve-input:focus {
+  outline: none;
+  border-color: var(--primary-yellow);
+  box-shadow: 0 0 0 3px rgba(255, 221, 68, 0.25);
+}
+
+.manage-resolve-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.manage-resolve-buttons .primary-button {
+  margin-top: 0;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.8rem;
+}
+
+.manage-resolve-buttons .danger {
+  background: var(--accent-red);
+  color: white;
+}
+
+.manage-resolve-buttons .danger:hover {
+  background: var(--hover-red);
+}
+
+/* ─── Empty State ────────────────────────────────────────────────────────── */
+
+.manage-empty {
+  padding: 2rem;
+}
+
+.manage-empty p {
+  color: var(--text-light);
+  font-size: 1.1rem;
+}
+
+/* ─── DataTable Overrides ────────────────────────────────────────────────── */
+
+.manage-accounts-container .rdt_Table {
+  background-color: var(--primary-blue) !important;
+  color: white !important;
+}
+
+.manage-accounts-container .rdt_TableHeadRow {
+  background-color: #0d126e !important;
+}
+
+.manage-accounts-container .rdt_TableCol {
+  color: var(--primary-yellow) !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+}
+
+.manage-accounts-container .rdt_TableRow {
+  background-color: var(--primary-blue) !important;
+  color: white !important;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.manage-accounts-container .rdt_TableRow:hover {
+  background-color: rgba(255, 221, 68, 0.15) !important;
+}
+
+.manage-accounts-container .rdt_TableCell {
+  font-size: 1rem !important;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+}
+
+.manage-accounts-container .rdt_Pagination {
+  background-color: #0d126e !important;
+  color: white !important;
+}
+
+/* ─── Loading ────────────────────────────────────────────────────────────── */
+
+.manage-accounts-loading {
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.manage-accounts-loading p {
+  color: var(--text-light);
+  font-size: 1.3rem;
+  margin: 1rem 0 0;
+}
+
+.manage-accounts-loading-notes {
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+}
+
+.manage-accounts-loading-notes .loading-note {
+  font-size: 2.2rem;
+  color: var(--primary-yellow);
+  animation: manage-bounce 1.4s ease-in-out infinite;
+}
+
+.manage-accounts-loading-notes .loading-note:nth-child(1) { animation-delay: 0s; }
+.manage-accounts-loading-notes .loading-note:nth-child(2) { animation-delay: 0.15s; }
+.manage-accounts-loading-notes .loading-note:nth-child(3) { animation-delay: 0.3s; }
+.manage-accounts-loading-notes .loading-note:nth-child(4) { animation-delay: 0.45s; }
+.manage-accounts-loading-notes .loading-note:nth-child(5) { animation-delay: 0.6s; }
+
+@keyframes manage-bounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+  40% { transform: translateY(-12px); opacity: 1; }
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .manage-accounts-container {
+    padding: 1.5rem 1rem;
+    width: calc(100% - 1rem);
+  }
+
+  .manage-search {
+    flex-direction: column;
+    align-items: stretch;
+    max-width: unset;
+  }
+
+  .manage-upgrade-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .manage-resolve-input {
+    width: 100%;
+  }
+
+  .manage-role-change {
+    max-width: unset;
+  }
+}
+
+/* ─── Reduced Motion ─────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .manage-accounts-loading-notes .loading-note {
+    animation: none;
+    opacity: 1;
+  }
+
+  .manage-role-change {
+    animation: none;
+  }
+}

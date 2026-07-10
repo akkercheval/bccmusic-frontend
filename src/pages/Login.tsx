@@ -87,7 +87,7 @@ export default function Login() {
   };
 
   return (
-    <div className="page-container">
+    <div className="login-container">
       <div className="page-card">
         {justLoggedOut && (
           <div className="success">You have been logged out successfully.</div>

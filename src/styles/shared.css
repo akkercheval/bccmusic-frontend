@@ -7,7 +7,7 @@
   --text-light: #e0e0ff;
   --input-bg: #1e1e4d;
   --border: #444;
-  --primary-green: #4CAF50;
+  --primary-green: #f5f2eb;
   --warning-amber: #f5a623;
   --warning-bg: rgba(245, 166, 35, 0.15);
 }
@@ -110,7 +110,7 @@ select:invalid:focus {
 
 .page-container {
   display: flex;
-  justify-content: top;
+  justify-content: center;
   align-items: center;
   padding: .5rem;
 }

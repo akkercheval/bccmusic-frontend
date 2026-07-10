@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import api from "../services/api";
 import PageTitle from "../components/PageTitle";
 import "./Register.css";
@@ -127,7 +127,6 @@ export default function Register() {
 
       case "phoneNumber":
         if (value) {
-          // Very basic client-side check (full validation can happen on backend too)
           if (!/^\+?\d[\d\s()-]{7,15}$/.test(value)) {
             error = "Invalid phone number format";
           }
@@ -196,7 +195,6 @@ export default function Register() {
     setIsLoading(true);
 
     try {
-      // Map form data to backend-expected shape
       const payload = {
         accountName: formData.accountName,
         username: formData.username,
@@ -228,8 +226,6 @@ export default function Register() {
         const data = axiosError.response?.data;
 
         if (status === 400 && data?.details && Array.isArray(data.details)) {
-          // Map server validation errors back to form fields
-          // Accumulate multiple errors per field with line breaks
           const serverErrors: Record<string, string> = {};
           data.details.forEach((errMsg: string) => {
             const lowerMsg = errMsg.toLowerCase();
@@ -261,213 +257,248 @@ export default function Register() {
   };
 
   return (
-    <div className="registration-form">
-      <PageTitle title="Create a New Account" />
+    <div className="register-container">
+      <div className="register-card">
+        <PageTitle title="Create a New Account" />
+        <p className="register-subtitle">
+          Join BCCMusic to browse, manage, and collaborate on music collections.
+        </p>
 
-      {serverError && <div className="error server-error">{serverError}</div>}
-      {errors.general && <div className="error server-error">{errors.general}</div>}
-      {successMessage && <div className="success">{successMessage}</div>}
+        {serverError && <div className="server-error">{serverError}</div>}
+        {errors.general && <div className="server-error">{errors.general}</div>}
+        {successMessage && <div className="success">{successMessage}</div>}
 
-      <form onSubmit={handleSubmit} noValidate>
-        <h2>Basic Account Information</h2>
+        <form onSubmit={handleSubmit} noValidate>
+          {/* Section: Account Info */}
+          <h2 className="register-section-title">Account Information</h2>
 
-        <div className="form-group">
-          <label htmlFor="accountName">Account Name:</label>
-          <input
-            type="text"
-            id="accountName"
-            name="accountName"
-            value={formData.accountName}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            required
-          />
-          {touched.accountName && errors.accountName && (
-            <span className="error">{errors.accountName}</span>
-          )}
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="username">Username:</label>
-          <input
-            type="text"
-            id="username"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            required
-          />
-          {touched.username && errors.username && (
-            <span className="error">{errors.username}</span>
-          )}
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            required
-          />
-          {errors.password && (
-            <span className="error">{errors.password}</span>
-          )}
-          {!errors.password &&
-            touched.password &&
-            formData.password &&
-            formData.password.length < 8 && (
-              <span className="hint">
-                Password should be at least 8 characters
-              </span>
+          <div className="form-group">
+            <label htmlFor="accountName">Account Name:</label>
+            <input
+              type="text"
+              id="accountName"
+              name="accountName"
+              value={formData.accountName}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              required
+            />
+            {touched.accountName && errors.accountName && (
+              <span className="error">{errors.accountName}</span>
             )}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="username">Username:</label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              required
+            />
+            {touched.username && errors.username && (
+              <span className="error">{errors.username}</span>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password">Password:</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              required
+            />
+            {errors.password && (
+              <span className="error">{errors.password}</span>
+            )}
+            {!errors.password &&
+              touched.password &&
+              formData.password &&
+              formData.password.length < 8 && (
+                <span className="hint">
+                  Password should be at least 8 characters
+                </span>
+              )}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="confirmPassword">Confirm Password:</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              required
+            />
+            {touched.confirmPassword && errors.confirmPassword && (
+              <span className="error">{errors.confirmPassword}</span>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="email">Email:</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              required
+            />
+            {touched.email && errors.email && (
+              <span className="error">{errors.email}</span>
+            )}
+          </div>
+
+          {/* Staff line divider */}
+          <div className="register-divider" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+
+          {/* Section: Phone */}
+          <h2 className="register-section-title">Phone</h2>
+
+          <div className="form-group">
+            <label htmlFor="phoneNumber">Phone Number:</label>
+            <input
+              type="tel"
+              id="phoneNumber"
+              name="phoneNumber"
+              placeholder="XXX-XXX-XXXX"
+              value={formData.phoneNumber}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            {touched.phoneNumber && errors.phoneNumber && (
+              <span className="error">{errors.phoneNumber}</span>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="phoneType">Phone Type:</label>
+            <select
+              id="phoneType"
+              name="phoneType"
+              value={formData.phoneType}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            >
+              <option value="">Select a Phone Type</option>
+              <option value="mobile">Mobile / Cell</option>
+              <option value="home">Home</option>
+              <option value="work">Work / Office</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          {/* Staff line divider */}
+          <div className="register-divider" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+
+          {/* Section: Website */}
+          <h2 className="register-section-title">Website</h2>
+
+          <div className="form-group">
+            <label htmlFor="website">Website URL:</label>
+            <input
+              type="url"
+              id="website"
+              name="website"
+              value={formData.website}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+          </div>
+
+          {/* Staff line divider */}
+          <div className="register-divider" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+
+          {/* Section: Address */}
+          <h2 className="register-section-title">Address</h2>
+
+          <div className="form-group">
+            <label htmlFor="streetAddress">Street Address:</label>
+            <input
+              type="text"
+              id="streetAddress"
+              name="streetAddress"
+              value={formData.streetAddress}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="city">City:</label>
+            <input
+              type="text"
+              id="city"
+              name="city"
+              value={formData.city}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="stateAbbr">State:</label>
+            <select
+              id="stateAbbr"
+              name="stateAbbr"
+              value={formData.stateAbbr}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            >
+              <option value="">Select a State</option>
+              {states.map((state) => (
+                <option key={state.value} value={state.value}>
+                  {state.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="zipCode">Zip Code:</label>
+            <input
+              type="text"
+              id="zipCode"
+              name="zipCode"
+              value={formData.zipCode}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            {touched.zipCode && errors.zipCode && (
+              <span className="error">{errors.zipCode}</span>
+            )}
+          </div>
+
+          <button type="submit" className="primary-button" disabled={isLoading}>
+            {isLoading ? "Creating Account..." : "Register"}
+          </button>
+        </form>
+
+        {/* Back to login */}
+        <div className="register-footer">
+          <p>Already have an account?</p>
+          <Link to="/login" className="register-login-link">
+            ← Back to Login
+          </Link>
         </div>
-
-        <div className="form-group">
-          <label htmlFor="confirmPassword">Confirm Password:</label>
-          <input
-            type="password"
-            id="confirmPassword"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            required
-          />
-          {touched.confirmPassword && errors.confirmPassword && (
-            <span className="error">{errors.confirmPassword}</span>
-          )}
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="email">Email:</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            required
-          />
-          {touched.email && errors.email && (
-            <span className="error">{errors.email}</span>
-          )}
-        </div>
-
-        <h2>Phone</h2>
-
-        <div className="form-group">
-          <label htmlFor="phoneNumber">Phone Number:</label>
-          <input
-            type="tel"
-            id="phoneNumber"
-            name="phoneNumber"
-            placeholder="XXX-XXX-XXXX"
-            value={formData.phoneNumber}
-            onChange={handleChange}
-            onBlur={handleBlur}
-          />
-          {touched.phoneNumber && errors.phoneNumber && (
-            <span className="error">{errors.phoneNumber}</span>
-          )}
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="phoneType">Phone Type:</label>
-          <select
-            id="phoneType"
-            name="phoneType"
-            value={formData.phoneType}
-            onChange={handleChange}
-            onBlur={handleBlur}
-          >
-            <option value="">Select a Phone Type</option>
-            <option value="mobile">Mobile / Cell</option>
-            <option value="home">Home</option>
-            <option value="work">Work / Office</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
-
-        <h2>Website</h2>
-
-        <div className="form-group">
-          <label htmlFor="website">Website URL:</label>
-          <input
-            type="url"
-            id="website"
-            name="website"
-            value={formData.website}
-            onChange={handleChange}
-            onBlur={handleBlur}
-          />
-        </div>
-
-        <h2>Address</h2>
-
-        <div className="form-group">
-          <label htmlFor="streetAddress">Street Address:</label>
-          <input
-            type="text"
-            id="streetAddress"
-            name="streetAddress"
-            value={formData.streetAddress}
-            onChange={handleChange}
-            onBlur={handleBlur}
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="city">City:</label>
-          <input
-            type="text"
-            id="city"
-            name="city"
-            value={formData.city}
-            onChange={handleChange}
-            onBlur={handleBlur}
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="stateAbbr">State:</label>
-          <select
-            id="stateAbbr"
-            name="stateAbbr"
-            value={formData.stateAbbr}
-            onChange={handleChange}
-            onBlur={handleBlur}
-          >
-            <option value="">Select a State</option>
-            {states.map((state) => (
-              <option key={state.value} value={state.value}>
-                {state.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="zipCode">Zip Code:</label>
-          <input
-            type="text"
-            id="zipCode"
-            name="zipCode"
-            value={formData.zipCode}
-            onChange={handleChange}
-            onBlur={handleBlur}
-          />
-        </div>
-
-        <button type="submit" disabled={isLoading}>
-          {isLoading ? "Creating Account..." : "Register"}
-        </button>
-      </form>
+      </div>
     </div>
   );
 }

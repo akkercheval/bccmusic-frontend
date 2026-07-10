@@ -1,152 +1,133 @@
-.registration-form {
-  text-align: left;
+/* ─── Register Page ───────────────────────────────────────────────────────── */
+
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 1rem 2rem;
+}
+
+.register-card {
+  background-color: var(--primary-blue);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  padding: 2.5rem 2.5rem;
   width: 100%;
-  max-width: 600px; 
-  margin: 2rem auto;
-  padding: 2rem;
-  background-color: #101585;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
   color: white;
-  min-height: 80vh; 
+  text-align: left;
+}
+
+/* ─── Subtitle ───────────────────────────────────────────────────────────── */
+
+.register-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-light);
+  text-align: center;
+  margin: 0 0 1.5rem;
+  opacity: 0.85;
+}
+
+/* ─── Section Titles ─────────────────────────────────────────────────────── */
+
+.register-section-title {
+  font-size: 1.5rem;
+  color: var(--primary-yellow);
+  margin: 1.5rem 0 1rem;
+  text-align: left;
+}
+
+/* ─── Staff Line Dividers ────────────────────────────────────────────────── */
+
+.register-divider {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 5px;
+  padding: 1.25rem 0;
+  opacity: 0.2;
 }
 
-/* Headings */
-h1 {
-  font-size: 2.8rem;
-  margin: 0 0 1.5rem 0;           /* much tighter top/bottom */
+.register-divider span {
+  display: block;
+  height: 2px;
+  background-color: var(--text-light);
+  border-radius: 1px;
+}
+
+/* ─── Submit Button ──────────────────────────────────────────────────────── */
+
+.register-card .primary-button {
+  display: block;
+  margin: 2rem auto 0;
+  max-width: 280px;
+}
+
+.register-card .primary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ─── Form layout constraint (keeps fields left-aligned on wide screens) ── */
+
+.register-card .form-group,
+.register-card .register-section-title {
+  max-width: 700px;
+}
+
+/* ─── Footer / Back to Login ─────────────────────────────────────────────── */
+
+.register-footer {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 221, 68, 0.15);
   text-align: center;
-  color: #FFDD44;
 }
 
-h2 {
-  font-size: 1.8rem;
-  margin: 1rem 0 1rem 0;        /* reduced spacing */
-  color: #FFDD44;
-}
-
-/* Form layout – use grid for alignment */
-.form-group {
-  display: grid;
-  grid-template-columns: 1fr 2fr;   /* label | input */
-  gap: 1rem;                        /* space between label and input */
-  align-items: center;
-  padding-bottom: 5px;
-}
-
-.form-group.full-width {
-  grid-template-columns: 1fr;       /* full width for textarea or special fields */
-}
-
-/* Labels */
-label {
-  font-weight: 500;
-  color: #e0e0ff;
-  text-align: right;
-  padding-right: .5rem;
-  font-size: 1.2rem;
-}
-
-/* Inputs & Select */
-input,
-select {
-  width: 90%;
-  padding: 0.75rem 1rem;
-  border: 1px solid #444;
-  border-radius: 6px;
-  background-color: #1e1e4d;
-  color: white;
+.register-footer p {
+  color: var(--text-light);
   font-size: 1rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  font-family: Playfair, Georgia, 'Times New Roman', Times, serif;
+  margin: 0 0 0.75rem;
+  opacity: 0.8;
 }
 
-input:focus,
-select:focus {
-  outline: none;
-  border-color: #FFDD44;
-  box-shadow: 0 0 0 3px rgba(255, 221, 68, 0.25);
-}
-
-/* Button */
-button[type="submit"] {
+.register-login-link {
+  display: inline-block;
   font-family: inherit;
-  background-color: #FFDD44;
-  color: #101585;
-  border: none;
-  border-radius: 8px;
-  padding: 0.9rem 2rem;
   font-size: 1.1rem;
   font-weight: 600;
-  cursor: pointer;
-  align-self: center;             
-  margin-top: 1.5rem;
+  color: var(--primary-yellow);
+  text-decoration: none;
+  padding: 0.6rem 1.5rem;
+  border: 1px solid rgba(255, 221, 68, 0.3);
+  border-radius: 8px;
   transition: all 0.2s ease;
 }
 
-button[type="submit"]:hover {
-  background-color: #ffeb3b;
+.register-login-link:hover {
+  background-color: rgba(255, 221, 68, 0.1);
+  border-color: var(--primary-yellow);
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
 }
 
-button[type="submit"]:active {
-  transform: translateY(0);
+.register-login-link:focus-visible {
+  outline: 3px solid var(--primary-yellow);
+  outline-offset: 3px;
 }
+
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
 
 @media (max-width: 600px) {
-  .form-group {
-    grid-template-columns: 1fr;
-    text-align: left;
+  .register-container {
+    padding: 0.5rem;
   }
-  label {
-    text-align: left;
-    padding-right: 0;
+
+  .register-card {
+    padding: 1.5rem 1rem;
+    border-radius: 12px;
   }
-}
 
-.error {
-  color: var(--accent-red);
-  font-size: 0.9rem;
-  margin-bottom: 0.25rem;
-  margin-left: 10px;
-  display: block;
-  grid-column: 2 / 3; /* align under input */
-  white-space: pre-line; /* preserve newlines from multi-error messages */
-}
-
-/* Optional: highlight invalid fields */
-input:invalid:focus,
-select:invalid:focus {
-  border-color: var(--accent-red);
-  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.25);
-}
-
-.success {
-  color: #44ff88;
-  background-color: rgba(68, 255, 136, 0.15);
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
-  text-align: center;
-}
-
-.server-error {
-  color: var(--accent-red);
-  background-color: rgba(255, 107, 107, 0.15);
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
-  text-align: center;
-}
-
-.hint {
-  color: #ffdd44;
-  font-size: 0.9rem;
-  margin-top: 0.25rem;
-  display: block;
-  grid-column: 2 / 3;
+  .register-section-title {
+    font-size: 1.3rem;
+  }
 }

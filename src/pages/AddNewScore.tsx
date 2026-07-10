@@ -11,6 +11,7 @@ import type {
   ComposerEntry,
   MedleyEntry,
   ScoreTag,
+  ScoreComment,
   Vendor,
   CreateScoreRequest,
 } from "../types/score";
@@ -57,6 +58,7 @@ export default function AddNewScore() {
   const [parts, setParts] = useState<Part[]>([]);
   const [scoreTags, setScoreTags] = useState<ScoreTag[]>([]);
   const [medleys, setMedleys] = useState<MedleyEntry[]>([]);
+  const [comments, setComments] = useState<ScoreComment[]>([]);
   const [scoreComposers, setScoreComposers] = useState<ComposerEntry[]>([
     { contributionType: "" },
   ]);
@@ -197,6 +199,9 @@ export default function AddNewScore() {
         pieceTitle: m.pieceTitle.trim(),
         composer: m.composerId ? { composerId: m.composerId } : null,
       })),
+      comments: comments.map((c) => ({
+        comment: c.comment.trim(),
+      })),
     };
 
     try {
@@ -239,6 +244,10 @@ export default function AddNewScore() {
           setScoreTags={setScoreTags}
           medleys={medleys}
           setMedleys={setMedleys}
+          comments={comments}
+          setComments={setComments}
+          currentUserId={user!.accountId}
+          commentPermission="full"
           errors={errors}
           touched={touched}
           onBlur={handleBlur}

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BCCMusic — Future Feature Suggestions</title>
+  <style>
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 1rem 2rem;
+      background: #f5f2eb;
+      color: #1a1a2e;
+      line-height: 1.7;
+    }
+    h1 { color: #101585; border-bottom: 3px solid #FFDD44; padding-bottom: 0.5rem; }
+    h2 { color: #101585; margin-top: 2.5rem; border-left: 4px solid #FFDD44; padding-left: 0.75rem; }
+    h3 { color: #333; margin-top: 1.5rem; }
+    ul { padding-left: 1.5rem; }
+    li { margin: 0.4rem 0; }
+    code { background: #e8e4dc; padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9rem; }
+    .priority-high { color: #d32f2f; font-weight: bold; }
+    .priority-med { color: #f57c00; font-weight: bold; }
+    .priority-low { color: #388e3c; font-weight: bold; }
+    table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+    th, td { border: 1px solid #ccc; padding: 0.6rem 0.8rem; text-align: left; }
+    th { background: #101585; color: #FFDD44; }
+    .note { background: #fff8e1; border-left: 4px solid #FFDD44; padding: 1rem; margin: 1rem 0; border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+<h1>BCCMusic — Future Feature Suggestions</h1>
+<p>This document outlines potential improvements and new features for the BCCMusic application, organized by category and priority.</p>
+
+<h2>1. Music File Uploads &amp; Storage</h2>
+
+<p>This is the most impactful addition for preservation and daily use. Users scan scores, create parts in ScanScore/Dorico, and need a place to store those files alongside the score metadata.</p>
+
+<h3>What to Store</h3>
+<ul>
+  <li>Original scans (PDF, PNG, JPG, TIFF)</li>
+  <li>Editable music files (Dorico .dorico, MusicXML .musicxml/.mxl, ScanScore projects)</li>
+  <li>Final printed parts (PDF exports from Dorico)</li>
+  <li>Full score conductor's copy (PDF)</li>
+</ul>
+
+<h3>Storage Options</h3>
+
+<table>
+  <tr>
+    <th>Option</th>
+    <th>Pros</th>
+    <th>Cons</th>
+    <th>Cost</th>
+  </tr>
+  <tr>
+    <td><strong>Azure Blob Storage</strong></td>
+    <td>Native to Azure hosting, SDK support for Java/Spring, lifecycle policies, CDN integration</td>
+    <td>Vendor lock-in to Azure</td>
+    <td>~$0.02/GB/month (hot tier)</td>
+  </tr>
+  <tr>
+    <td><strong>AWS S3</strong></td>
+    <td>Industry standard, excellent Java SDK, presigned URLs, versioning, lifecycle rules</td>
+    <td>Extra if you're already on Azure</td>
+    <td>~$0.023/GB/month (standard)</td>
+  </tr>
+  <tr>
+    <td><strong>Local/NAS file system</strong></td>
+    <td>No cloud dependency, full control, no recurring cost</td>
+    <td>No redundancy unless mirrored, backup responsibility is yours, not accessible from outside</td>
+    <td>Hardware cost only</td>
+  </tr>
+  <tr>
+    <td><strong>Database BLOBs (MSSQL)</strong></td>
+    <td>Single system, transactional consistency</td>
+    <td>Bloats database, terrible performance for large files, backup size explodes</td>
+    <td>Included in DB cost but expensive at scale</td>
+  </tr>
+</table>
+
+<div class="note">
+  <strong>Recommendation:</strong> Use <strong>Azure Blob Storage</strong> or <strong>AWS S3</strong> for the actual files, and store only metadata (filename, size, content type, storage key/URL, upload date, uploaded by) in your MSSQL database. This keeps your database lean and your files accessible via signed URLs.
+</div>
+
+<h3>Suggested Database Schema</h3>
+<pre><code>CREATE TABLE ScoreFiles (
+    file_id         BIGINT IDENTITY PRIMARY KEY,
+    score_id        BIGINT NOT NULL REFERENCES Scores(score_id),
+    file_name       NVARCHAR(255) NOT NULL,
+    file_type       VARCHAR(50) NOT NULL,       -- 'SCAN', 'PART_PDF', 'FULL_SCORE', 'EDITABLE', 'OTHER'
+    content_type    VARCHAR(100) NOT NULL,       -- MIME type: 'application/pdf', 'image/png', etc.
+    file_size_bytes BIGINT,
+    storage_key     NVARCHAR(500) NOT NULL,      -- S3/Blob path or key
+    part_id         BIGINT NULL REFERENCES Parts(part_id),  -- optional: link to specific part
+    description     NVARCHAR(500),
+    uploaded_by     BIGINT NOT NULL REFERENCES Account(account_id),
+    uploaded_at     DATETIME2(0) NOT NULL DEFAULT GETDATE(),
+    CONSTRAINT FK_ScoreFiles_Score FOREIGN KEY (score_id) REFERENCES Scores(score_id)
+);</code></pre>
+
+<h3>Implementation Approach</h3>
+<ol>
+  <li>Backend: Add a <code>POST /scores/{scoreId}/files</code> endpoint accepting multipart uploads</li>
+  <li>Backend: Stream the file to blob storage, save metadata to DB, return the file record</li>
+  <li>Backend: Add <code>GET /scores/{scoreId}/files</code> to list files, <code>GET /scores/{scoreId}/files/{fileId}/download</code> to generate a signed download URL</li>
+  <li>Frontend: Add a "Files" section to ViewEditScore (collapsible like Parts/Comments)</li>
+  <li>Frontend: Drag-and-drop upload area with progress indicator</li>
+  <li>Frontend: File list showing name, type badge, size, uploader, and download button</li>
+</ol>
+
+<h3>File Organization Strategy</h3>
+<p>Store files with a path structure like:</p>
+<pre><code>scores/{scoreId}/{fileType}/{filename}
+Example: scores/1042/scans/trumpet-1-page1.pdf
+         scores/1042/parts/clarinet-2.pdf
+         scores/1042/editable/full-score.dorico</code></pre>
+
+<h2>2. Search &amp; Discovery Enhancements</h2>
+<ul>
+  <li><span class="priority-high">[HIGH]</span> Full-text search across comments, part instruments, and composer names (not just title/tag)</li>
+  <li><span class="priority-med">[MED]</span> Advanced filter panel: grade range slider, arrangement type checkboxes, purchased date range</li>
+  <li><span class="priority-med">[MED]</span> "Recently viewed" or "Recently edited" section on Dashboard</li>
+  <li><span class="priority-low">[LOW]</span> Saved searches / bookmarked filters</li>
+  <li><span class="priority-low">[LOW]</span> Sort options: by date added, grade, title, last updated</li>
+</ul>
+
+<h2>3. Collaboration Improvements</h2>
+<ul>
+  <li><span class="priority-high">[HIGH]</span> Expand <code>canEdit</code> logic so collaborators can edit scores (currently only owner can)</li>
+  <li><span class="priority-med">[MED]</span> Activity feed on Dashboard: "John added a comment to March Triumphant"</li>
+  <li><span class="priority-med">[MED]</span> Email notifications when a collaborator edits your score</li>
+  <li><span class="priority-low">[LOW]</span> Collaboration audit log (who changed what field, when)</li>
+  <li><span class="priority-low">[LOW]</span> Per-score permission overrides (some collaborators can only edit specific scores)</li>
+</ul>
+
+<h2>4. Music Library Features</h2>
+<ul>
+  <li><span class="priority-high">[HIGH]</span> File uploads (see section 1 above)</li>
+  <li><span class="priority-med">[MED]</span> Set lists / concert programs: group scores for a performance with ordering</li>
+  <li><span class="priority-med">[MED]</span> "Needed parts" checklist for performance prep (which parts do we have? which are missing?)</li>
+  <li><span class="priority-med">[MED]</span> Duplicate/clone a score (useful for alternate arrangements of the same piece)</li>
+  <li><span class="priority-low">[LOW]</span> Bulk import from CSV or spreadsheet for initial data migration</li>
+  <li><span class="priority-low">[LOW]</span> Score difficulty/grade distribution chart on Dashboard</li>
+</ul>
+
+<h2>5. UX Polish</h2>
+<ul>
+  <li><span class="priority-med">[MED]</span> Keyboard shortcuts: <code>E</code> to edit, <code>Escape</code> to cancel, <code>Ctrl+S</code> to save</li>
+  <li><span class="priority-med">[MED]</span> Breadcrumb navigation: Dashboard &gt; My Scores &gt; Score #1234</li>
+  <li><span class="priority-med">[MED]</span> Unsaved changes warning when navigating away from edit mode</li>
+  <li><span class="priority-low">[LOW]</span> Dark/light theme toggle</li>
+  <li><span class="priority-low">[LOW]</span> Print-friendly view of score details</li>
+  <li><span class="priority-low">[LOW]</span> Export score details as PDF</li>
+  <li><span class="priority-low">[LOW]</span> Skeleton loading states instead of bouncing notes (reduces perceived wait)</li>
+</ul>
+
+<h2>6. Admin &amp; Operations</h2>
+<ul>
+  <li><span class="priority-med">[MED]</span> Dashboard analytics: total scores, scores added this month, most active users</li>
+  <li><span class="priority-med">[MED]</span> User activity log for administrators</li>
+  <li><span class="priority-low">[LOW]</span> Backup/export all data as JSON or CSV</li>
+  <li><span class="priority-low">[LOW]</span> System health monitoring endpoint</li>
+  <li><span class="priority-low">[LOW]</span> Rate limiting on public endpoints to prevent abuse</li>
+</ul>
+
+<h2>7. Account &amp; Security</h2>
+<ul>
+  <li><span class="priority-high">[HIGH]</span> Current password verification before password change</li>
+  <li><span class="priority-med">[MED]</span> Email verification on registration and email change</li>
+  <li><span class="priority-med">[MED]</span> Password reset via email (forgot password flow)</li>
+  <li><span class="priority-med">[MED]</span> Account deactivation (soft disable, admin can reactivate)</li>
+  <li><span class="priority-low">[LOW]</span> "Last login" display on My Account page</li>
+  <li><span class="priority-low">[LOW]</span> "Log out all sessions" button</li>
+  <li><span class="priority-low">[LOW]</span> Two-factor authentication (TOTP)</li>
+</ul>
+
+<h2>8. Performance &amp; Infrastructure</h2>
+<ul>
+  <li><span class="priority-med">[MED]</span> Pagination on the backend for score lists (currently loads all into memory)</li>
+  <li><span class="priority-med">[MED]</span> Add nginx reverse proxy rules for API in production (currently missing from nginx.conf)</li>
+  <li><span class="priority-low">[LOW]</span> Service worker for offline access to viewed scores</li>
+  <li><span class="priority-low">[LOW]</span> Image optimization pipeline for uploaded scans (thumbnails, compression)</li>
+  <li><span class="priority-low">[LOW]</span> CDN for static assets in production</li>
+</ul>
+
+</body>
+</html>

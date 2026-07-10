@@ -1,51 +1,178 @@
-.my-collaborators-container {
+/* ─── My Collaborators Page ───────────────────────────────────────────────── */
+
+.collaborators-container {
   background-color: var(--primary-blue);
-  border-radius: 12px;
+  border-radius: 16px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  padding: 2rem 2rem;
-  width: 100%;
+  padding: 2rem 2.5rem;
+  width: calc(100% - 5rem);
+  margin: 1rem auto;
   color: white;
   text-align: center;
 }
 
-h1 {
-  margin-bottom: 1rem;
+.collaborators-subtitle {
+  color: var(--text-light);
+  font-size: 1.1rem;
+  margin: 0 0 1rem;
+  opacity: 0.8;
 }
 
-.error-message {
+.collaborators-subtitle strong {
+  color: var(--primary-yellow);
+}
+
+/* ─── Actions ────────────────────────────────────────────────────────────── */
+
+.collaborators-actions {
+  margin: 1rem 0 2rem;
+}
+
+.collaborators-actions .primary-button {
+  margin-top: 0;
+}
+
+/* ─── Loading State (Musical) ────────────────────────────────────────────── */
+
+.collaborators-loading {
+  padding: 3rem 1rem;
+}
+
+.collaborators-loading p {
+  color: var(--text-light);
+  font-size: 1.3rem;
+  margin: 1rem 0 0;
+}
+
+.collaborators-loading-notes {
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+}
+
+.collaborators-loading-notes .loading-note {
+  font-size: 2.2rem;
+  color: var(--primary-yellow);
+  animation: collab-bounce 1.4s ease-in-out infinite;
+}
+
+.collaborators-loading-notes .loading-note:nth-child(1) { animation-delay: 0s; }
+.collaborators-loading-notes .loading-note:nth-child(2) { animation-delay: 0.15s; }
+.collaborators-loading-notes .loading-note:nth-child(3) { animation-delay: 0.3s; }
+.collaborators-loading-notes .loading-note:nth-child(4) { animation-delay: 0.45s; }
+.collaborators-loading-notes .loading-note:nth-child(5) { animation-delay: 0.6s; }
+
+@keyframes collab-bounce {
+  0%, 80%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  40% {
+    transform: translateY(-12px);
+    opacity: 1;
+  }
+}
+
+/* ─── Error State ────────────────────────────────────────────────────────── */
+
+.collaborators-error {
+  padding: 2rem 1rem;
+}
+
+.collaborators-error-icon {
+  display: block;
+  font-size: 3rem;
   color: var(--accent-red);
-  text-align: center;
+  opacity: 0.6;
+  margin-bottom: 0.5rem;
+}
+
+.collaborators-error p {
+  color: var(--accent-red);
   font-size: 1.2rem;
-  padding: 2rem;
 }
 
-.loading {
-  text-align: center;
-  font-size: 1.5rem;
-  padding: 4rem;
+/* ─── Empty State ────────────────────────────────────────────────────────── */
+
+.collaborators-empty {
+  padding: 3rem 1rem;
 }
 
-.rdt_Table {
+.collaborators-empty-icon {
+  display: block;
+  font-size: 4rem;
+  color: var(--primary-yellow);
+  opacity: 0.5;
+  margin-bottom: 0.5rem;
+}
+
+.collaborators-empty p {
+  color: var(--text-light);
+  font-size: 1.2rem;
+  margin: 0.5rem 0;
+}
+
+/* ─── DataTable Overrides ────────────────────────────────────────────────── */
+
+.collaborators-container .rdt_Table {
   background-color: var(--primary-blue) !important;
   color: white !important;
-  font-size: 1.5rem;
 }
 
-.rdt_TableHeadRow {
-  background-color: var(--secondary-blue) !important;
-  font-weight: bold;
+.collaborators-container .rdt_TableHeadRow {
+  background-color: #0d126e !important;
 }
 
-.rdt_TableRow {
+.collaborators-container .rdt_TableCol {
+  white-space: normal !important;
+  word-break: break-word !important;
+  overflow: visible !important;
+  color: var(--primary-yellow) !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+}
+
+.collaborators-container .rdt_TableRow {
   background-color: var(--primary-blue) !important;
   color: white !important;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
-.rdt_TableRow:hover {
-  background-color: var(--secondary-blue) !important;
+.collaborators-container .rdt_TableRow:hover {
+  background-color: rgba(255, 221, 68, 0.2) !important;
+  color: var(--primary-yellow) !important;
+  cursor: pointer;
 }
 
-.rdt_Pagination {
-  background-color: var(--secondary-blue) !important;
+.collaborators-container .rdt_TableCell {
+  text-align: left !important;
+  align-items: flex-start !important;
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+  font-size: 1.05rem !important;
+}
+
+.collaborators-container .rdt_Pagination {
+  background-color: #0d126e !important;
   color: white !important;
-} 
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .collaborators-container {
+    padding: 1.5rem 1rem;
+    border-radius: 12px;
+    width: calc(100% - 1rem);
+    box-sizing: border-box;
+  }
+}
+
+/* ─── Reduced Motion ─────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .collaborators-loading-notes .loading-note {
+    animation: none;
+    opacity: 1;
+  }
+}

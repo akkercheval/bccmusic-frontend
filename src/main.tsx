@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext.tsx";
-import App from "./App.tsx";
+import Home from "./pages/Home.tsx";
 import Login from "./pages/Login.tsx";
 import Register from "./pages/Register.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
@@ -16,17 +16,20 @@ import PrivateLayout from "./components/PrivateLayout.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import "./styles/shared.css";
 import EditCollaborator from "./pages/EditCollaborator.tsx";
+import MyAccount from "./pages/MyAccount.tsx";
+import ManageAccounts from "./pages/ManageAccounts.tsx";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<App />} />
+          <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/" element={<PrivateLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/account" element={<MyAccount />} />
             <Route path="/my-scores" element={<MyScores />} />
             <Route path="/add-new-score" element={<AddNewScore />} />
             <Route path="/scores/:scoreId" element={<ViewEditScore />} />
@@ -37,6 +40,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
               path="/collaborators/:collaboratorId"
               element={<EditCollaborator />}
             />
+            <Route path="/admin/manage-accounts" element={<ManageAccounts />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
